@@ -1,0 +1,2572 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAD C EXTENSION TSF v2.1 PRO — Supervision Command & Geotechnical Suite | Banyuwangi</title>
+    <meta name="description" content="Sistem Supervisi Profesional Pad C Extension TSF (Tailings Storage Facility) Tambang Emas Tujuh Bukit Banyuwangi: Peta Komando Live, Prakiraan Cuaca, Windy Radar, Analisis GEV/PMP, Hidrograf HSS Nakayasu, QA/QC GISTM, Gempa PuSGeN, dan Berita Acara PDF.">
+    <meta property="og:title" content="PAD C EXTENSION TSF v2.0 PRO — Supervision Command Suite">
+    <meta property="og:description" content="Konsultan Supervisi Geoteknik, Keamanan Bendungan & Hidrologi (GISTM 2020) — Banyuwangi Site.">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2309142b'/%3E%3Cpath d='M32 8 54 20v24L32 56 10 44V20z' fill='none' stroke='%23f59e0b' stroke-width='3'/%3E%3Ctext x='32' y='40' font-family='monospace' font-size='22' font-weight='bold' fill='%23fbbf24' text-anchor='middle'%3EC%3C/text%3E%3C/svg%3E">
+    
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        tech: ['Orbitron', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Menlo', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6.5.1 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <!-- SheetJS (xlsx) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <style>
+        :root {
+            --bg-cmd: #050b18;
+            --card-cmd: rgba(10, 18, 38, 0.94);
+            --border-cmd: rgba(245, 158, 11, 0.28);
+            --text-cmd: #f8fafc;
+        }
+        body {
+            background-color: var(--bg-cmd);
+            color: var(--text-cmd);
+            font-family: 'Inter', sans-serif;
+        }
+        .font-tech { font-family: 'Orbitron', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(5, 11, 24, 0.8); }
+        ::-webkit-scrollbar-thumb { background: #d97706; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+
+        .cmd-panel {
+            background: var(--card-cmd);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-cmd);
+            border-radius: 0.95rem;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.65);
+            transition: border-color 0.2s ease;
+        }
+        .cmd-panel:hover { border-color: rgba(245, 158, 11, 0.55); }
+
+        .typing-dot { width: 6px; height: 6px; border-radius: 9999px; background: #22d3ee; display: inline-block; animation: typing-blink 1s infinite ease-in-out; }
+        @keyframes typing-blink { 0%, 100% { opacity: 0.25; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-2px); } }
+        .animate-slideIn { animation: slideIn-toast .3s ease-out; }
+        @keyframes slideIn-toast { from { transform: translateX(30px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes pulse-glow {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.18); opacity: 0.35; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        .pulse-live { animation: pulse-glow 2s infinite ease-in-out; }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #b45309, #d97706);
+            color: #ffffff;
+            border-color: #fbbf24;
+            box-shadow: 0 4px 14px 0 rgba(217, 119, 6, 0.45);
+        }
+
+        .chat-drawer {
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+        }
+        .chat-drawer.closed {
+            transform: translateY(110%) scale(0.95);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .chat-drawer.open {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #commandLeafletMap {
+            width: 100% !important;
+            height: 100% !important;
+            min-height: 500px !important;
+            z-index: 10;
+        }
+        .leaflet-container { background-color: #040814 !important; }
+
+        @media print {
+            body { background: #ffffff !important; color: #000000 !important; font-size: 10pt; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .report-page { border: none !important; box-shadow: none !important; padding: 0 !important; width: 100% !important; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- BOOT LOADING ANIMATION (v2.0 PRO) -->
+    <div id="bootOverlay" class="fixed inset-0 z-[9999] bg-[#040a18] flex flex-col items-center justify-center gap-5 transition-opacity duration-700">
+        <div class="relative">
+            <div class="w-20 h-20 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
+            <div class="absolute inset-0 w-20 h-20 border-4 border-transparent border-b-amber-300/60 rounded-full animate-spin" style="animation-direction:reverse;animation-duration:1.6s"></div>
+            <i class="fa-solid fa-mountain-sun absolute inset-0 m-auto text-3xl text-amber-400 animate-pulse"></i>
+        </div>
+        <div class="font-tech text-lg sm:text-2xl font-black tracking-[0.3em] text-amber-400 text-center px-4">PAD C EXTENSION TSF</div>
+        <div class="text-[10px] sm:text-xs font-mono text-slate-400 tracking-widest uppercase">Supervision Command &amp; Geotechnical Suite — Banyuwangi Site</div>
+        <div class="w-64 max-w-[80vw]">
+            <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div id="bootBar" class="h-full w-0 bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-500 rounded-full transition-all duration-300"></div>
+            </div>
+            <div id="bootStatus" class="text-center text-[9px] font-mono text-amber-300 mt-2">INISIALISASI SISTEM SUPERVISI...</div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="fixed top-20 right-3 sm:right-5 z-[980] space-y-2 max-w-[90vw] no-print"></div>
+
+    <!-- HEADER UTAMA SUPERVISI -->
+    <header class="sticky top-0 z-50 bg-[#070e1e]/95 backdrop-blur-md border-b border-amber-600/35 shadow-2xl no-print">
+        <div class="max-w-[98%] mx-auto px-2 sm:px-4">
+            <div class="flex flex-col lg:flex-row items-center justify-between py-2 lg:h-16 gap-2">
+                
+                <!-- Identitas Proyek & Konsultan Supervisi -->
+                <div class="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-400 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-amber-500/30">
+                            Au
+                        </div>
+                        <div>
+                            <h1 class="font-tech text-sm sm:text-base font-black tracking-wider text-amber-400 flex items-center gap-2">
+                                <span>PAD C EXTENSION TSF COMMAND SUITE</span>
+                                <span class="text-[9px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600 font-mono">BANYUWANGI SITE</span>
+                                <span class="text-[9px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-600 font-mono">v2.1 PRO</span>
+                            </h1>
+                            <p class="text-[10px] text-emerald-400 font-mono font-medium flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-live"></span>
+                                <span>KONSULTAN SUPERVISI GEOTEKNIK, KEAMANAN BENDUNGAN &amp; HIDROLOGI (GISTM 2020)</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex lg:hidden items-center gap-1">
+                        <button onclick="toggleChatWindow()" class="p-2 rounded-lg bg-amber-600 text-white text-xs">
+                            <i class="fa-solid fa-robot"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Jam & Penanggalan Dinamis WIB -->
+                <div class="hidden sm:flex items-center gap-2.5 bg-[#09142b] border border-amber-600/40 rounded-xl px-3.5 py-1.5 text-xs font-mono text-amber-300">
+                    <i class="fa-regular fa-clock text-amber-400"></i>
+                    <span id="topSupervisionClock">Memuat waktu...</span>
+                </div>
+
+                <!-- Toolbar & Aksi Cepat -->
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs font-mono">
+                    
+                    <button onclick="openAppsModal()" class="px-2.5 py-1 rounded bg-purple-900/70 hover:bg-purple-800 border border-purple-500 text-purple-200 text-[11px] font-bold flex items-center gap-1 transition">
+                        <i class="fa-solid fa-cubes-stacked"></i> MY APPS <span class="text-[9px] bg-purple-950 px-1 rounded">57</span>
+                    </button>
+
+                    <button onclick="openDevModal()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold border border-slate-700 flex items-center gap-1 transition">
+                        <i class="fa-solid fa-user-tie text-amber-400"></i> DEV
+                    </button>
+
+                    <button onclick="window.print()" class="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold flex items-center gap-1 transition shadow">
+                        <i class="fa-solid fa-file-pdf"></i> CETAK A4
+                    </button>
+
+                    <button onclick="exportSupervisionXLSX()" class="px-2.5 py-1 rounded bg-emerald-800 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 transition shadow">
+                        <i class="fa-solid fa-file-excel"></i> EXCEL
+                    </button>
+
+                    <button onclick="exportSupervisionPDF()" class="px-2.5 py-1 rounded bg-rose-800 hover:bg-rose-700 text-white text-[11px] font-bold flex items-center gap-1 transition shadow" title="Ekspor Berita Acara PDF Profesional (jsPDF)">
+                        <i class="fa-solid fa-file-lines"></i> PDF
+                    </button>
+
+                    <button onclick="startScreensaver()" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-bold border border-slate-700 flex items-center gap-1 transition" title="Screensaver Mode">
+                        <i class="fa-solid fa-tv"></i>
+                    </button>
+
+                    <button onclick="openHelpModal()" class="px-2.5 py-1 rounded bg-sky-900/70 hover:bg-sky-800 border border-sky-600 text-sky-200 text-[11px] font-bold flex items-center gap-1 transition" title="Bantuan & Metrik Sistem">
+                        <i class="fa-solid fa-circle-question"></i>
+                    </button>
+
+                    <button onclick="toggleChatWindow()" class="px-3 py-1 rounded-lg bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white text-[11px] font-bold shadow-md flex items-center gap-1.5">
+                        <i class="fa-solid fa-brain"></i>
+                        <span>AI GEOCONSULT</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB NAVIGASI UTAMA (SEMUA MODUL TERSEDIA) -->
+        <div class="bg-[#030611] border-t border-slate-800 px-2 sm:px-4 overflow-x-auto">
+            <nav class="max-w-[98%] mx-auto flex space-x-1 py-1.5 text-xs font-semibold" id="mainTabNav">
+                <button onclick="switchTab('tab-command')" id="btn-tab-command" class="tab-btn active px-3.5 py-1.5 rounded-lg flex items-center gap-2 whitespace-nowrap transition-all border border-amber-500/40">
+                    <i class="fa-solid fa-display text-amber-400"></i>
+                    <span>Dasbor Utama (Command Center)</span>
+                </button>
+                <button onclick="switchTab('tab-weather')" id="btn-tab-weather" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent">
+                    <i class="fa-solid fa-cloud-showers-water text-cyan-400"></i>
+                    <span>Prediksi Cuaca &amp; Akumulasi (hidrologi.net)</span>
+                </button>
+                <button onclick="switchTab('tab-map-windy')" id="btn-tab-map-windy" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent">
+                    <i class="fa-solid fa-satellite-dish text-emerald-400"></i>
+                    <span>Peta Geospasial &amp; Radar Windy</span>
+                </button>
+                <button onclick="switchTab('tab-climate')" id="btn-tab-climate" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent">
+                    <i class="fa-solid fa-mountain-sun text-sky-400"></i>
+                    <span>Hidroklimatologi &amp; DAS</span>
+                </button>
+                <button onclick="switchTab('tab-gev')" id="btn-tab-gev" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent">
+                    <i class="fa-solid fa-chart-line text-indigo-400"></i>
+                    <span>Hujan Rencana GEV</span>
+                </button>
+                <button onclick="switchTab('tab-flood')" id="btn-tab-flood" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent">
+                    <i class="fa-solid fa-water text-blue-400"></i>
+                    <span>Debit Banjir</span>
+                </button>
+                <button onclick="switchTab('tab-qaqc')" id="btn-tab-qaqc" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent">
+                    <i class="fa-solid fa-clipboard-check text-teal-400"></i>
+                    <span>QA/QC Timbunan &amp; Uji Las HDPE</span>
+                </button>
+                <button onclick="switchTab('tab-seismic')" id="btn-tab-seismic" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent">
+                    <i class="fa-solid fa-earth-asia text-rose-400"></i>
+                    <span>Seismik PuSGeN 2024</span>
+                </button>
+                <button onclick="switchTab('tab-report')" id="btn-tab-report" class="tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent">
+                    <i class="fa-solid fa-print text-amber-300"></i>
+                    <span>Laporan Resmi Supervisi (A4)</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- KONTEN APLIKASI -->
+    <main class="flex-1 max-w-[98%] w-full mx-auto px-2 sm:px-4 py-4 space-y-4">
+
+        <!-- ==================== TAB 1: DASBOR UTAMA COMMAND CENTER ==================== -->
+        <section id="tab-command" class="tab-content block space-y-4">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+                
+                <!-- KOLOM KIRI: INSTRUMENTASI GEOTEKNIK (3 Cols) -->
+                <div class="lg:col-span-3 space-y-3.5">
+                    
+                    <div class="cmd-panel p-4 space-y-3 border-l-4 border-l-amber-500">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-tower-observation text-amber-400 text-sm"></i>
+                                <h3 class="font-tech text-xs font-bold text-white tracking-wider">INSTRUMENTASI REALTIME</h3>
+                            </div>
+                            <button onclick="openInputModal()" class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-600 font-bold hover:bg-amber-900 transition font-mono">EDIT DATA</button>
+                        </div>
+
+                        <div class="space-y-2 text-xs font-mono">
+                            <!-- VWP-01 -->
+                            <div class="p-2.5 rounded-lg bg-[#071024] border border-slate-800 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-200">PIEZOMETER VWP-01 (Toe Dam)</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold" id="badgeVwp01">NORMAL</span>
+                                </div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-slate-400">Tekanan Air Pori:</span>
+                                    <span class="font-bold text-cyan-300" id="valVwp01">42.5 kPa</span>
+                                </div>
+                                <div class="flex justify-between text-[10px] text-slate-500">
+                                    <span>Ambang Batas:</span>
+                                    <span>Waspada &gt; 60 | Bahaya &gt; 80 kPa</span>
+                                </div>
+                            </div>
+
+                            <!-- INC-03 -->
+                            <div class="p-2.5 rounded-lg bg-[#071024] border border-slate-800 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-200">INCLINOMETER INC-03 (Bench 4)</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold" id="badgeInc03">AMAN</span>
+                                </div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-slate-400">Laju Deformasi:</span>
+                                    <span class="font-bold text-amber-300" id="valInc03">1.2 mm/bulan</span>
+                                </div>
+                                <div class="flex justify-between text-[10px] text-slate-500">
+                                    <span>Batas Aman:</span>
+                                    <span>&lt; 2.5 mm/bulan</span>
+                                </div>
+                            </div>
+
+                            <!-- Rembesan LDS Weir -->
+                            <div class="p-2.5 rounded-lg bg-[#071024] border border-slate-800 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-200">WEIR UNDERDRAIN (LDS Sump)</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold" id="badgeWeir02">STABIL</span>
+                                </div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-slate-400">Debit Terukur:</span>
+                                    <span class="font-bold text-emerald-300" id="valWeir02">0.85 L/detik</span>
+                                </div>
+                                <div class="flex justify-between text-[10px] text-slate-500">
+                                    <span>Karakter Air:</span>
+                                    <span class="text-white">pH 6.85 (Bebas Lindi Asam)</span>
+                                </div>
+                            </div>
+
+                            <!-- Kolam PLS & Storm Pond -->
+                            <div class="p-2.5 rounded-lg bg-[#071024] border border-slate-800 space-y-1">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-200">KOLAM PLS &amp; EVENT POND</span>
+                                    <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-950 text-blue-300 font-bold">OPERASIONAL</span>
+                                </div>
+                                <div class="flex justify-between text-[11px]">
+                                    <span class="text-slate-400">Sisa Freeboard:</span>
+                                    <span class="font-bold text-white">2.45 meter</span>
+                                </div>
+                                <div class="flex justify-between text-[10px] text-slate-500">
+                                    <span>Kapasitas Lolos PMF:</span>
+                                    <span class="text-emerald-400 font-bold">148.0 m³/detik</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PARAMETER TEKNIS PAD C EXTENSION -->
+                    <div class="cmd-panel p-4 space-y-2.5 border-l-4 border-l-cyan-500 text-xs font-mono">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <h3 class="font-tech font-bold text-white">DATA TEKNIS FASILITAS</h3>
+                            <span class="text-[10px] text-cyan-300 bg-cyan-950 px-2 py-0.5 rounded font-bold">PAD C BSI</span>
+                        </div>
+                        <div class="space-y-1.5 text-slate-300">
+                            <div class="flex justify-between py-1 border-b border-slate-800/60">
+                                <span class="text-slate-400">Luas Tapak Fasilitas:</span>
+                                <span class="font-bold text-white">± 48.5 Hektar</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-800/60">
+                                <span class="text-slate-400">Kapasitas Tumpukan Ore:</span>
+                                <span class="font-bold text-amber-300">36.0 Juta Ton</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-800/60">
+                                <span class="text-slate-400">Tinggi Maks. Tumpukan:</span>
+                                <span class="font-bold text-white">72.0 m (6 Jenjang)</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-800/60">
+                                <span class="text-slate-400">Lapisan Dasar Kedap:</span>
+                                <span class="font-bold text-emerald-300">Double Liner (GCL + HDPE 2.0mm)</span>
+                            </div>
+                            <div class="flex justify-between py-1 border-b border-slate-800/60">
+                                <span class="text-slate-400">Beban Gempa MDE:</span>
+                                <span class="font-bold text-rose-400">PGA = 0.48g (PuSGeN 2024)</span>
+                            </div>
+                            <div class="flex justify-between py-1">
+                                <span class="text-slate-400">Klasifikasi Konsekuensi:</span>
+                                <span class="font-bold text-rose-400">Extreme Consequence (GISTM)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- KOLOM TENGAH: PETA SPASIAL PAD C DENGAN KONTROL PENUH (6 Cols) -->
+                <div class="lg:col-span-6 space-y-3.5">
+                    <div class="cmd-panel p-4 space-y-3">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-crosshairs text-amber-400 text-sm"></i>
+                                <h3 class="font-tech text-xs font-bold text-white tracking-wider">SPASIAL COMMAND CENTRE PAD C</h3>
+                            </div>
+
+                            <!-- TOMBOL-TOMBOL KONTROL PETA YANG BERFUNGSI SEMPURNA -->
+                            <div class="flex items-center gap-1.5 shrink-0 flex-wrap">
+                                <button onclick="focusPadC()" id="btnFocusPadC" class="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-500 text-slate-950 font-black text-[10px] transition-all flex items-center gap-1 shadow-md shadow-amber-600/40">
+                                    <i class="fa-solid fa-location-crosshairs"></i> FOKUS PAD C
+                                </button>
+                                <button onclick="setMapBaseLayer('sat')" id="btnLayerSat" class="px-2.5 py-1 rounded bg-cyan-700 text-white font-bold text-[10px] border border-cyan-400 transition-all">
+                                    SATELIT HD
+                                </button>
+                                <button onclick="setMapBaseLayer('topo')" id="btnLayerTopo" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[10px] border border-slate-700 transition-all">
+                                    KONTUR TOPOGRAFI
+                                </button>
+                                <button onclick="setMapBaseLayer('osm')" id="btnLayerOsm" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-[10px] border border-slate-700 transition-all">
+                                    OSM
+                                </button>
+                                <button onclick="window.open('https://earth.google.com/web/@-8.5985,114.0375,0a,1500d,35y,0h,0t,0r','_blank')" class="px-2.5 py-1 rounded bg-emerald-900 hover:bg-emerald-800 text-emerald-200 font-bold text-[10px] border border-emerald-500 transition-all" title="Buka Pad C di Google Earth 3D">
+                                    <i class="fa-solid fa-earth-asia"></i> EARTH 3D
+                                </button>
+                                <button onclick="toggleMapFullscreen()" class="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs border border-slate-700" title="Mode Layar Penuh">
+                                    <i class="fa-solid fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Kontainer Peta Leaflet -->
+                        <div id="mapWrapper" class="relative w-full h-[520px] rounded-xl overflow-hidden border border-slate-700 bg-slate-950 shadow-2xl">
+                            <div id="commandLeafletMap" class="w-full h-full"></div>
+                            
+                            <!-- Indikator Layer Aktif -->
+                            <div class="absolute top-3 left-3 z-[400] bg-slate-950/90 backdrop-blur border border-slate-700 px-3 py-1.5 rounded-lg text-[10px] font-mono text-slate-300 shadow">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1.5 animate-pulse"></span>
+                                <span id="mapLayerIndicator">Layer: Esri World Imagery (HD Satelit)</span>
+                            </div>
+
+                            <!-- Legenda Spasial Pad C -->
+                            <div class="absolute bottom-3 left-3 z-[400] bg-slate-950/90 backdrop-blur border border-slate-700 p-2.5 rounded-xl shadow-xl text-[10px] font-mono space-y-1 max-w-xs">
+                                <div class="font-bold text-amber-400 border-b border-slate-800 pb-0.5">LEGENDA PAD C</div>
+                                <div class="flex items-center gap-1.5"><span class="w-3 h-1 bg-red-500"></span> <span>Tanggul Penahan Perimeter (H=72m)</span></div>
+                                <div class="flex items-center gap-1.5"><span class="w-3 h-1 bg-blue-400"></span> <span>Jaringan Pipa Kolektor PLS</span></div>
+                                <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 bg-cyan-600 rounded"></span> <span>PLS Pond &amp; Event Pond</span></div>
+                                <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span> <span>Piezometer VWP &amp; Inclinometer</span></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 pt-1">
+                            <span><i class="fa-solid fa-satellite text-amber-400 mr-1"></i> Tapak: -8.59850° LS, 114.03750° BT &bull; Gunung Tumpang Pitu</span>
+                            <span class="text-emerald-400"><i class="fa-solid fa-circle-check mr-1"></i> Terkalibrasi Peta Ortofoto Udara</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- KOLOM KANAN: MATRIKS KEPUTUSAN SUPERVISI & TARP (3 Cols) -->
+                <div class="lg:col-span-3 space-y-3.5">
+                    
+                    <div class="cmd-panel p-4 space-y-3 border-l-4 border-l-rose-500">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-triangle-exclamation text-rose-400 text-sm"></i>
+                                <h3 class="font-tech text-xs font-bold text-white tracking-wider">MATRIKS PROTOKOL TARP</h3>
+                            </div>
+                            <span class="text-[9px] px-2 py-0.5 rounded bg-slate-900 text-rose-300 font-bold border border-rose-800 font-mono">GISTM 2020</span>
+                        </div>
+
+                        <div class="space-y-2 text-xs font-mono">
+                            <div class="p-2 rounded-lg bg-emerald-950/40 border border-emerald-700/60">
+                                <span class="font-bold text-emerald-300 block text-[11px]">LEVEL 1: NORMAL (HIJAU)</span>
+                                <p class="text-[10px] text-slate-300 font-sans">PWP &lt; 60 kPa, deformasi &lt; 2.5 mm/bln. Operasi penumpukan ore normal, supervisi rutin harian.</p>
+                            </div>
+                            <div class="p-2 rounded-lg bg-amber-950/40 border border-amber-700/60">
+                                <span class="font-bold text-amber-300 block text-[11px]">LEVEL 2: WASPADA (KUNING)</span>
+                                <p class="text-[10px] text-slate-300 font-sans">PWP 60–80 kPa atau deformasi 2.5–5 mm/bln. Tingkatkan frekuensi baca sensor 2x sehari, inspeksi visual retakan lereng.</p>
+                            </div>
+                            <div class="p-2 rounded-lg bg-rose-950/40 border border-rose-700/60">
+                                <span class="font-bold text-rose-300 block text-[11px]">LEVEL 3: SIAGA (MERAH)</span>
+                                <p class="text-[10px] text-slate-300 font-sans">PWP &gt; 80 kPa atau gempa PGA &gt; 0.25g. Hentikan sirkulasi larutan, evakuasi alat berat, aktifkan RTD.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAKTOR KEAMANAN LERENG -->
+                    <div class="cmd-panel p-4 space-y-2.5 border-l-4 border-l-emerald-500 text-xs font-mono">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                            <h3 class="font-tech font-bold text-white">FAKTOR KEAMANAN LERENG (FK)</h3>
+                            <span class="text-[10px] text-emerald-300 font-bold">SNI 8460:2017</span>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center py-1 border-b border-slate-800/60">
+                                <span class="text-slate-400">FK Statis Morgenstern-Price:</span>
+                                <span class="font-bold text-emerald-400 text-sm">1.68 (≥ 1.50)</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1 border-b border-slate-800/60">
+                                <span class="text-slate-400">FK Gempa MDE (kh=0.22g):</span>
+                                <span class="font-bold text-blue-400 text-sm">1.24 (≥ 1.15)</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1 border-b border-slate-800/60">
+                                <span class="text-slate-400">FK Pasca-Likuifaksi (Sr):</span>
+                                <span class="font-bold text-amber-400 text-sm">1.19 (≥ 1.10)</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1">
+                                <span class="text-slate-400">Status Supervisi:</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-600">STABIL &amp; AMAN</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        
+        <!-- BARIS SUMBER & REFERENSI INTERNET (v2.0 PRO) -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2 no-print">
+            <span class="text-slate-500 font-bold uppercase"><i class="fa-solid fa-book-open"></i> Sumber:</span>
+            <a href="https://earth.google.com/web/@-8.5985,114.0375,0a,1000d,35y,0h,0t,0r" target="_blank" class="text-emerald-400 hover:underline"><i class='fa-solid fa-globe'></i> Google Earth 3D</a>
+            <a href="https://id.wikipedia.org/wiki/Bendangan_tailing" target="_blank" class="text-emerald-300 hover:underline"><i class='fa-brands fa-wikipedia-w'></i> Wikipedia: Bendungan Tailing</a>
+            <a href="https://www.globaltailingsreview.org/global-industry-standard/" target="_blank" class="text-amber-400 hover:underline"><i class='fa-solid fa-shield-halved'></i> GISTM 2020</a>
+        </div>
+</section>
+
+        <!-- ==================== TAB 2: PREDIKSI CUACA & AKUMULASI (HIDROLOGI.NET) ==================== -->
+        <section id="tab-weather" class="tab-content hidden space-y-5">
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div class="cmd-panel p-3.5 border-t-2 border-t-amber-400">
+                    <span class="text-[11px] text-slate-400">Suhu Udara</span>
+                    <div class="text-2xl font-tech font-bold text-white mt-1">28.5°C</div>
+                    <span class="text-[10px] text-slate-400">Terasa: 31.8°C</span>
+                </div>
+                <div class="cmd-panel p-3.5 border-t-2 border-t-cyan-400">
+                    <span class="text-[11px] text-slate-400">Kelembapan (RH)</span>
+                    <div class="text-2xl font-tech font-bold text-cyan-300 mt-1">84%</div>
+                    <span class="text-[10px] text-slate-400">Titik Embun: 25.2°C</span>
+                </div>
+                <div class="cmd-panel p-3.5 border-t-2 border-t-blue-400">
+                    <span class="text-[11px] text-slate-400">Curah Hujan Terkini</span>
+                    <div class="text-2xl font-tech font-bold text-blue-300 mt-1">18.2 mm</div>
+                    <span class="text-[10px] text-emerald-400">Hujan Ringan</span>
+                </div>
+                <div class="cmd-panel p-3.5 border-t-2 border-t-emerald-400">
+                    <span class="text-[11px] text-slate-400">Kecepatan Angin</span>
+                    <div class="text-2xl font-tech font-bold text-emerald-300 mt-1">3.8 m/s</div>
+                    <span class="text-[10px] text-slate-400">Tenggara (130°)</span>
+                </div>
+                <div class="cmd-panel p-3.5 border-t-2 border-t-indigo-400">
+                    <span class="text-[11px] text-slate-400">Tekanan Atmosfer</span>
+                    <div class="text-2xl font-tech font-bold text-indigo-300 mt-1">1011.8 hPa</div>
+                    <span class="text-[10px] text-slate-400">Barometer Normal</span>
+                </div>
+                <div class="cmd-panel p-3.5 border-t-2 border-t-purple-400">
+                    <span class="text-[11px] text-slate-400">Jarak Pandang &amp; UV</span>
+                    <div class="text-2xl font-tech font-bold text-purple-300 mt-1">10.0 km</div>
+                    <span class="text-[10px] text-amber-400">UV Index: 6 (Tinggi)</span>
+                </div>
+            </div>
+
+            <!-- Akumulasi Hujan Model (Interval Operasional Lapangan hidrologi.net) -->
+            <div class="cmd-panel p-5 space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-cloud-showers-heavy text-cyan-400"></i>
+                            <span>Akumulasi Hujan Model Lapangan (Interval 6, 12, 24, 72 Jam &amp; 7 Hari)</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Penjumlahan presipitasi numerik koordinat -8.5985°, 114.0375° untuk evaluasi muka air kolam PLS dan keselamatan lereng tumpukan.</p>
+                    </div>
+                    <span class="text-xs px-2.5 py-1 rounded bg-slate-900 text-cyan-300 font-mono border border-slate-700">
+                        Sumber: Open-Meteo &amp; hidrologi.net
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                    <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400 font-medium">Akumulasi 6 Jam</span>
+                        <div class="text-2xl font-tech font-bold text-white">3.2 <span class="text-xs font-sans text-slate-400">mm</span></div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-600/40">AMAN</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400 font-medium">Akumulasi 12 Jam</span>
+                        <div class="text-2xl font-tech font-bold text-white">9.5 <span class="text-xs font-sans text-slate-400">mm</span></div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-600/40">AMAN</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-amber-500/40 p-3.5 rounded-xl space-y-1 bg-amber-950/10">
+                        <span class="text-xs text-amber-300 font-medium">Akumulasi 24 Jam</span>
+                        <div class="text-2xl font-tech font-bold text-amber-300">24.6 <span class="text-xs font-sans text-slate-400">mm</span></div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-500/40">WASPADA SEDANG</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400 font-medium">Akumulasi 72 Jam</span>
+                        <div class="text-2xl font-tech font-bold text-white">56.0 <span class="text-xs font-sans text-slate-400">mm</span></div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-amber-950 text-amber-300 font-bold border border-amber-500/40">SIAGA AIR ASAM</span>
+                    </div>
+                    <div class="bg-slate-900/90 border border-slate-800 p-3.5 rounded-xl space-y-1">
+                        <span class="text-xs text-slate-400 font-medium">Akumulasi 7 Hari</span>
+                        <div class="text-2xl font-tech font-bold text-white">114.8 <span class="text-xs font-sans text-slate-400">mm</span></div>
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-blue-950 text-blue-300 font-bold border border-blue-500/40">SIKLUS MINGGUAN</span>
+                    </div>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-[#061228] border border-slate-700 flex items-start gap-3 text-xs">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-base mt-0.5"></i>
+                    <div>
+                        <span class="font-bold text-amber-300">Rekomendasi Operasional Supervisi Konstruksi Pad C:</span>
+                        <p class="text-slate-300 mt-0.5">Peluang hujan konvektif meningkat pada rentang pukul 14:00 - 18:00 WIB (65%). Pekerjaan penggelaran dan pengelasan geomembran HDPE dianjurkan selesai sebelum pukul 13:00 WIB untuk menghindari kelembapan tinggi pada kanal las fusi.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grafik Presipitasi & Tabel Interval 3 Jam -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div class="lg:col-span-7 cmd-panel p-5 space-y-3">
+                    <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column text-cyan-400"></i>
+                        <span>Prakiraan Presipitasi 3-Jam &amp; Probabilitas Hujan (7 Hari)</span>
+                    </h4>
+                    <div class="h-64">
+                        <canvas id="weatherForecastChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 cmd-panel p-5 space-y-3 overflow-hidden">
+                    <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-amber-400"></i>
+                        <span>Tabel Prediksi Cuaca Interval 3 Jam</span>
+                    </h4>
+                    <div class="overflow-x-auto max-h-64 rounded-lg border border-slate-800">
+                        <table class="w-full text-[11px] font-mono text-left">
+                            <thead class="bg-slate-900 text-slate-400 sticky top-0">
+                                <tr>
+                                    <th class="p-2">Waktu (WIB)</th>
+                                    <th class="p-2 text-right">Suhu</th>
+                                    <th class="p-2 text-right">Hujan (mm)</th>
+                                    <th class="p-2 text-right">Peluang</th>
+                                    <th class="p-2 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 text-slate-300" id="tableWeatherBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        
+        <!-- BARIS SUMBER & REFERENSI INTERNET (v2.0 PRO) -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2 no-print">
+            <span class="text-slate-500 font-bold uppercase"><i class="fa-solid fa-book-open"></i> Sumber:</span>
+            <a href="https://www.bmkg.go.id/wilayah/perakiram/banyuwangi.bmkg" target="_blank" class="text-sky-400 hover:underline"><i class='fa-solid fa-cloud-sun-rain'></i> BMKG Banyuwangi</a>
+            <a href="https://id.wikipedia.org/wiki/Iklim_tropis" target="_blank" class="text-emerald-300 hover:underline"><i class='fa-brands fa-wikipedia-w'></i> Wikipedia: Iklim Tropis</a>
+            <a href="https://www.windy.com/-8.598,114.038,10" target="_blank" class="text-cyan-300 hover:underline"><i class='fa-solid fa-wind'></i> Windy.com</a>
+        </div>
+</section>
+
+        <!-- ==================== TAB 3: PETA GEOSPASIAL & RADAR WINDY ==================== -->
+        <section id="tab-map-windy" class="tab-content hidden space-y-4">
+            
+            <div class="cmd-panel p-5 space-y-4">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-satellite-dish text-emerald-400"></i>
+                            <span>Radar Cuaca Satelit Real-Time Windy.com (Banyuwangi &amp; Samudra Hindia)</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Pemantauan badai tropis, arah angin monsun tenggara, dan pergerakan awan konvektif di atas tapak tambang emas Banyuwangi.</p>
+                    </div>
+
+                    <!-- Windy Layer Buttons -->
+                    <div class="flex items-center gap-1.5 flex-wrap text-xs font-mono">
+                        <button onclick="setWindyLayer('wind')" class="px-2.5 py-1 rounded bg-amber-950 text-amber-300 font-bold border border-amber-600">Angin</button>
+                        <button onclick="setWindyLayer('rain')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Hujan</button>
+                        <button onclick="setWindyLayer('radar')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Radar Cuaca</button>
+                        <button onclick="setWindyLayer('satellite')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Satelit</button>
+                        <button onclick="setWindyLayer('waves')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Gelombang Laut</button>
+                    </div>
+                </div>
+
+                <!-- Iframe Windy.com -->
+                <div class="relative w-full h-[580px] rounded-xl overflow-hidden border border-slate-700 bg-slate-950 shadow-2xl">
+                    <iframe 
+                        id="windyFrame" 
+                        class="w-full h-full border-0 block"
+                        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=10&overlay=wind&product=ecmwf&level=surface&lat=-8.5985&lon=114.0375&detailLat=-8.5985&detailLon=114.0375&marker=true&message=true"
+                        allowfullscreen
+                        title="Windy.com Banyuwangi Weather Radar"
+                    ></iframe>
+                </div>
+            </div>
+
+        
+        <!-- BARIS SUMBER & REFERENSI INTERNET (v2.0 PRO) -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2 no-print">
+            <span class="text-slate-500 font-bold uppercase"><i class="fa-solid fa-book-open"></i> Sumber:</span>
+            <a href="https://www.windy.com/-8.598,114.038,10" target="_blank" class="text-cyan-300 hover:underline"><i class='fa-solid fa-wind'></i> Windy.com Banyuwangi</a>
+            <a href="https://www.bmkg.go.id/cuaca/radar.bmkg" target="_blank" class="text-sky-400 hover:underline"><i class='fa-solid fa-satellite-dish'></i> Radar BMKG</a>
+        </div>
+</section>
+
+        <!-- ==================== TAB 4: HIDROKLIMATOLOGI & DAS ==================== -->
+        <section id="tab-climate" class="tab-content hidden space-y-5">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="cmd-panel p-4 space-y-1.5 border-t-2 border-t-amber-400">
+                    <span class="text-xs text-slate-400">Luas DTA Fasilitas Pad C</span>
+                    <div class="text-2xl font-tech font-bold text-white">48.5 <span class="text-sm font-sans font-normal text-slate-400">Ha</span></div>
+                    <p class="text-[11px] text-slate-400">Luas Total DAS Kali Bagon: <span class="text-slate-200 font-semibold">145.2 km²</span></p>
+                </div>
+                <div class="cmd-panel p-4 space-y-1.5 border-t-2 border-t-cyan-400">
+                    <span class="text-xs text-slate-400">Curah Hujan Rerata Tahunan</span>
+                    <div class="text-2xl font-tech font-bold text-cyan-300">2.685 <span class="text-sm font-sans font-normal text-slate-400">mm/thn</span></div>
+                    <p class="text-[11px] text-slate-400">Pola: Musim Hujan (Nov–Apr), Musim Kering (Jun–Sep)</p>
+                </div>
+                <div class="cmd-panel p-4 space-y-1.5 border-t-2 border-t-emerald-400">
+                    <span class="text-xs text-slate-400">Karakteristik Tanah Dasar</span>
+                    <div class="text-2xl font-tech font-bold text-emerald-300">HSG Kelas C</div>
+                    <p class="text-[11px] text-slate-400">Lempung tufaan teralterasi hidrotermal (k ≤ 10⁻⁷ cm/s)</p>
+                </div>
+                <div class="cmd-panel p-4 space-y-1.5 border-t-2 border-t-purple-400">
+                    <span class="text-xs text-slate-400">Bulan Puncak Terbasah</span>
+                    <div class="text-2xl font-tech font-bold text-purple-300">Januari - Feb</div>
+                    <p class="text-[11px] text-slate-400">Rerata bulanan: <span class="text-slate-200 font-semibold">380 - 450 mm/bulan</span></p>
+                </div>
+            </div>
+
+            <!-- Tabel Curah Hujan Bulanan (2021-2026) -->
+            <div class="cmd-panel p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-days text-amber-400"></i>
+                            <span>Rekapitulasi Curah Hujan Bulanan Stasiun Cuaca Tambang Emas Banyuwangi (2021–2026)</span>
+                        </h3>
+                        <p class="text-xs text-slate-400">Nilai dalam milimeter (mm), diukur menggunakan Automatic Weather Station (AWS) Pit Tumpang Pitu.</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-lg border border-slate-800">
+                    <table class="w-full text-center text-xs font-mono">
+                        <thead class="bg-slate-900 text-slate-400">
+                            <tr>
+                                <th class="p-2.5 text-left">Tahun</th>
+                                <th class="p-2">Jan</th><th class="p-2">Feb</th><th class="p-2">Mar</th><th class="p-2">Apr</th>
+                                <th class="p-2">Mei</th><th class="p-2">Jun</th><th class="p-2">Jul</th><th class="p-2">Ags</th>
+                                <th class="p-2">Sep</th><th class="p-2">Okt</th><th class="p-2">Nov</th><th class="p-2">Des</th>
+                                <th class="p-2.5 font-bold text-amber-300">Total (mm)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            <tr><td class="p-2 text-left font-bold text-white">2021</td><td>385</td><td>310</td><td>265</td><td>180</td><td>145</td><td>95</td><td>60</td><td>25</td><td>45</td><td>110</td><td>240</td><td>320</td><td class="font-bold text-amber-300">2.180</td></tr>
+                            <tr><td class="p-2 text-left font-bold text-white">2022</td><td>410</td><td>350</td><td>290</td><td>210</td><td>160</td><td>110</td><td>75</td><td>30</td><td>55</td><td>135</td><td>265</td><td>360</td><td class="font-bold text-amber-300">2.455</td></tr>
+                            <tr><td class="p-2 text-left font-bold text-white">2023</td><td>395</td><td>340</td><td>275</td><td>195</td><td>130</td><td>80</td><td>45</td><td>15</td><td>30</td><td>85</td><td>220</td><td>340</td><td class="font-bold text-amber-300">2.145</td></tr>
+                            <tr><td class="p-2 text-left font-bold text-white">2024</td><td>460</td><td>420</td><td>335</td><td>250</td><td>185</td><td>135</td><td>90</td><td>40</td><td>65</td><td>160</td><td>310</td><td>415</td><td class="font-bold text-amber-300">2.865</td></tr>
+                            <tr class="bg-amber-950/20 font-bold"><td class="p-2 text-left text-amber-400">2025 (Terbasah)</td><td>520</td><td>480</td><td>390</td><td>295</td><td>210</td><td>155</td><td>110</td><td>55</td><td>85</td><td>195</td><td>360</td><td>490</td><td class="font-bold text-amber-300">3.345</td></tr>
+                            <tr><td class="p-2 text-left font-bold text-white">2026 (s/d Sep)</td><td>440</td><td>410</td><td>320</td><td>230</td><td>170</td><td>115</td><td>70</td><td>35</td><td>48</td><td>-</td><td>-</td><td>-</td><td class="font-bold text-amber-300">1.838</td></tr>
+                            <tr class="bg-slate-900 font-bold text-emerald-400"><td class="p-2.5 text-left text-white">RATA-RATA</td><td>435</td><td>385</td><td>312</td><td>227</td><td>167</td><td>114</td><td>75</td><td>33</td><td>55</td><td>137</td><td>279</td><td>385</td><td class="text-sm font-tech">2.685</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        
+        <!-- BARIS SUMBER & REFERENSI INTERNET (v2.0 PRO) -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2 no-print">
+            <span class="text-slate-500 font-bold uppercase"><i class="fa-solid fa-book-open"></i> Sumber:</span>
+            <a href="https://iklim.bmkg.go.id/" target="_blank" class="text-orange-400 hover:underline"><i class='fa-solid fa-temperature-arrow-up'></i> BMKG Iklim</a>
+            <a href="https://www.ipcc.ch/report/ar6/wg1/" target="_blank" class="text-red-400 hover:underline"><i class='fa-solid fa-earth-asia'></i> IPCC AR6</a>
+            <a href="https://id.wikipedia.org/wiki/Perubahan_iklim" target="_blank" class="text-emerald-300 hover:underline"><i class='fa-brands fa-wikipedia-w'></i> Wikipedia: Perubahan Iklim</a>
+        </div>
+</section>
+
+        <!-- ==================== TAB 5: HUJAN RENCANA GEV & PMP ==================== -->
+        <section id="tab-gev" class="tab-content hidden space-y-5">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <div class="lg:col-span-7 cmd-panel p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <h3 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-area text-indigo-400"></i>
+                            <span>Kurva Hujan Rencana GEV &amp; PMP Hersfield (SNI 7746-2012)</span>
+                        </h3>
+                        <span class="text-xs px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 font-mono">DTA Pad C Ext</span>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="gevChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 cmd-panel p-5 space-y-3">
+                    <h4 class="text-sm font-bold text-white border-b border-slate-800 pb-2">
+                        Rekapitulasi Hujan Rencana &amp; Uji Kewajaran Rasio
+                    </h4>
+                    <div class="overflow-x-auto rounded-lg border border-slate-800">
+                        <table class="w-full text-xs font-mono text-right">
+                            <thead class="bg-slate-900 text-slate-400">
+                                <tr>
+                                    <th class="p-2 text-left">Periode Ulang</th>
+                                    <th class="p-2">Hujan (mm)</th>
+                                    <th class="p-2">Rasio R_T/R2</th>
+                                    <th class="p-2 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 text-slate-300">
+                                <tr><td class="p-2 text-left text-white font-bold">2 Tahun</td><td>112.5</td><td>1.00</td><td class="text-center text-slate-400">Dasar</td></tr>
+                                <tr><td class="p-2 text-left text-white font-bold">5 Tahun</td><td>148.0</td><td>1.31</td><td class="text-center text-slate-400">Lolos</td></tr>
+                                <tr><td class="p-2 text-left text-white font-bold">10 Tahun</td><td>174.5</td><td>1.55</td><td class="text-center text-slate-400">Lolos</td></tr>
+                                <tr><td class="p-2 text-left text-white font-bold">25 Tahun</td><td>208.0</td><td>1.85</td><td class="text-center text-slate-400">Lolos</td></tr>
+                                <tr><td class="p-2 text-left text-white font-bold">50 Tahun</td><td>232.0</td><td>2.06</td><td class="text-center text-slate-400">Lolos</td></tr>
+                                <tr class="bg-indigo-950/30 font-bold"><td class="p-2 text-left text-cyan-300">100 Tahun (Desain)</td><td class="text-cyan-300">258.4</td><td class="text-emerald-400">2.30</td><td class="text-center text-emerald-400">MEMENUHI</td></tr>
+                                <tr><td class="p-2 text-left text-white font-bold">1000 Tahun</td><td>362.0</td><td>3.21</td><td class="text-center text-slate-400">Spillway</td></tr>
+                                <tr class="bg-purple-950/40 font-bold text-purple-300"><td class="p-2 text-left">PMP (Hersfield)</td><td>618.5</td><td>5.50</td><td class="text-center text-purple-300">Ekstrem</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-[11px] text-slate-400">
+                        *Rasio kewajaran R100/R2 = 2.30 memenuhi rentang standar Balai Teknik Bendungan (1.7 – 3.2).
+                    </p>
+                </div>
+            </div>
+
+        
+        <!-- BARIS SUMBER & REFERENSI INTERNET (v2.0 PRO) -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2 no-print">
+            <span class="text-slate-500 font-bold uppercase"><i class="fa-solid fa-book-open"></i> Sumber:</span>
+            <a href="https://id.wikipedia.org/wiki/Distribusi_nilai_ekstrem_umum" target="_blank" class="text-emerald-300 hover:underline"><i class='fa-brands fa-wikipedia-w'></i> Wikipedia: Distribusi Nilai Ekstrem (GEV)</a>
+            <a href="https://www.weather.gov/abq/HMRs" target="_blank" class="text-blue-400 hover:underline"><i class='fa-solid fa-cloud-rain'></i> NOAA PMP/HMR</a>
+            <a href="https://library.wmo.int/idnum/43716" target="_blank" class="text-cyan-300 hover:underline"><i class='fa-solid fa-droplet'></i> WMO No.1045 PMP</a>
+        </div>
+</section>
+
+        <!-- ==================== TAB 6: DEBIT BANJIR & ROUTING ==================== -->
+        <section id="tab-flood" class="tab-content hidden space-y-5">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                <div class="lg:col-span-7 cmd-panel p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                        <h3 class="text-sm font-bold text-white">Hidrograf Debit Banjir Inflow (HSS Nakayasu)</h3>
+                        <span class="text-xs text-slate-400 font-mono">Q_PMF = 148.0 m³/dtk</span>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="floodChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 cmd-panel p-5 space-y-3 text-xs">
+                    <h4 class="text-sm font-bold text-white border-b border-slate-800 pb-2">
+                        Kapasitas Saluran Pengelak &amp; Stormwater Pond
+                    </h4>
+                    <div class="space-y-2 font-mono text-[11px]">
+                        <div class="flex justify-between py-1 border-b border-slate-800">
+                            <span class="text-slate-400">Debit Banjir Desain Q100:</span>
+                            <span class="font-bold text-cyan-300">62.5 m³/detik</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800">
+                            <span class="text-slate-400">Debit Banjir Ekstrem Q_PMF:</span>
+                            <span class="font-bold text-rose-400">148.0 m³/detik</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800">
+                            <span class="text-slate-400">Kapasitas Tampung Storm Pond:</span>
+                            <span class="font-bold text-white">85.000 m³</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-800">
+                            <span class="text-slate-400">Dimensi Saluran Diversion Ditch:</span>
+                            <span class="font-bold text-emerald-300">Lebar Dasar 6.0 m, Tinggi 3.5 m</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-400">Status Keamanan Limpasan:</span>
+                            <span class="font-bold text-emerald-400">BEBAS OVERTOPPING (Freeboard &gt; 2.0 m)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        
+        <!-- BARIS SUMBER & REFERENSI INTERNET (v2.0 PRO) -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2 no-print">
+            <span class="text-slate-500 font-bold uppercase"><i class="fa-solid fa-book-open"></i> Sumber:</span>
+            <a href="https://id.wikipedia.org/wiki/Hidrograf" target="_blank" class="text-emerald-300 hover:underline"><i class='fa-brands fa-wikipedia-w'></i> Wikipedia: Hidrograf</a>
+            <a href="https://scholar.google.com/scholar?q=Nakayasu+synthetic+unit+hydrograph" target="_blank" class="text-sky-400 hover:underline"><i class='fa-solid fa-water'></i> HSS Nakayasu (Scholar)</a>
+            <a href="https://www.hec.usace.army.mil/software/hec-hms/" target="_blank" class="text-blue-300 hover:underline"><i class='fa-solid fa-house-flood-water'></i> USACE HEC-HMS</a>
+        </div>
+</section>
+
+        <!-- ==================== TAB 7: QA/QC TIMBUNAN & HDPE ==================== -->
+        <section id="tab-qaqc" class="tab-content hidden space-y-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="cmd-panel p-5 space-y-3 border-t-2 border-t-amber-500">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-trowel-bricks text-amber-400"></i> QA/QC Pemadatan Timbunan Tanah (Sand Cone)
+                    </h3>
+                    <div class="space-y-2 text-xs font-mono">
+                        <div class="flex justify-between py-1 border-b border-slate-800"><span class="text-slate-400">Target Kepadatan:</span><span class="font-bold text-emerald-400">≥ 95% Standard Proctor (ASTM D698)</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-800"><span class="text-slate-400">Kadar Air Pemadatan:</span><span class="font-bold text-white">w_opt ± 2%</span></div>
+                        <div class="flex justify-between py-1"><span class="text-slate-400">Koefisien Permeabilitas:</span><span class="font-bold text-cyan-300">k ≤ 1 × 10⁻⁷ cm/s</span></div>
+                    </div>
+                </div>
+
+                <div class="cmd-panel p-5 space-y-3 border-t-2 border-t-blue-500">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-slate-800 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-blue-400"></i> Uji Las Geomembran HDPE (ASTM D5820 &amp; D5641)
+                    </h3>
+                    <div class="space-y-2 text-xs font-mono">
+                        <div class="flex justify-between py-1 border-b border-slate-800"><span class="text-slate-400">Air Pressure Test:</span><span class="font-bold text-emerald-400">210 kPa selama 5 menit (Drop &lt; 10 kPa)</span></div>
+                        <div class="flex justify-between py-1 border-b border-slate-800"><span class="text-slate-400">Vacuum Box Test:</span><span class="font-bold text-white">35 kPa (Tidak Ada Gelembung)</span></div>
+                        <div class="flex justify-between py-1"><span class="text-slate-400">Uji Kuat Kupas/Geser:</span><span class="font-bold text-cyan-300">Film Tear Bond (FTB) &gt; 90%</span></div>
+                    </div>
+                </div>
+            </div>
+        
+        <!-- BARIS SUMBER & REFERENSI INTERNET (v2.0 PRO) -->
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2 no-print">
+            <span class="text-slate-500 font-bold uppercase"><i class="fa-solid fa-book-open"></i> Sumber:</span>
+            <a href="https://www.globaltailingsreview.org/global-industry-standard/" target="_blank" class="text-amber-400 hover:underline"><i class='fa-solid fa-shield-halved'></i> GISTM 2020</a>
+            <a href="https://www.icold-cigb.org/GB/publications/bulletins.asp" target="_blank" class="text-sky-400 hover:underline"><i class='fa-solid fa-dam'></i> ICOLD Bulletins</a>
+            <a href="https://www.astm.org/committee/g13-geosynthetics" target="_blank" class="text-emerald-300 hover:underline"><i class='fa-solid fa-flask-vial'></i> ASTM Geosynthetic</a>
+        </div>
+</section>
+
+        <!-- ==================== TAB 8: SEISMIK PUSGEN 2024 ==================== -->
+        <section id="tab-seismic" class="tab-content hidden space-y-4">
+            <!-- PANEL INPUT TITIK TAPAK (model site-report bahterasiaga) -->
+            <div class="cmd-panel p-5 space-y-3">
+                <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2 flex items-center justify-between">
+                    <span><i class="fa-solid fa-location-crosshairs text-rose-400"></i> SEISMIC SITE REPORT — SNI 1726:2019 &amp; PuSGeN 2024</span>
+                    <span class="text-[9px] px-2 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-600 font-mono">SITUS PAD C</span>
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px] font-mono">
+                    <div>
+                        <label class="text-slate-400 block mb-1"><i class="fa-solid fa-crosshairs"></i> Latitude (Lintang)</label>
+                        <input type="number" step="0.0001" id="ssrLat" value="-8.5985" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1"><i class="fa-solid fa-crosshairs"></i> Longitude (Bujur)</label>
+                        <input type="number" step="0.0001" id="ssrLon" value="114.0375" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1"><i class="fa-solid fa-layer-group"></i> Kelas Situs</label>
+                        <select id="ssrSoil" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-rose-500">
+                            <option value="SA">SA — Batuan Keras (Vs &gt; 1500 m/s)</option>
+                            <option value="SB">SB — Batuan (760 &lt; Vs ≤ 1500 m/s)</option>
+                            <option value="SC">SC — Tanah Keras (360 &lt; Vs ≤ 760 m/s)</option>
+                            <option value="SD" selected>SD — Tanah Sedang (180 &lt; Vs ≤ 360 m/s)</option>
+                            <option value="SE">SE — Tanah Lunak (Vs &lt; 180 m/s)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1"><i class="fa-solid fa-triangle-exclamation"></i> Kategori Risiko</label>
+                        <select id="ssrRisk" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-rose-500">
+                            <option value="I">I — Risiko Rendah</option>
+                            <option value="II">II — Risiko Sedang</option>
+                            <option value="III">III — Risiko Tinggi</option>
+                            <option value="IV" selected>IV — Fasilitas Kritis (Extreme Consequence TSF)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1"><i class="fa-solid fa-mountain"></i> PGA Batuan Dasar (g)</label>
+                        <input type="number" step="0.01" id="ssrPga" value="0.48" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1"><i class="fa-solid fa-wave-square"></i> Ss — 0.2 detik (g)</label>
+                        <input type="number" step="0.01" id="ssrSs" value="1.05" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1"><i class="fa-solid fa-wave-square"></i> S1 — 1.0 detik (g)</label>
+                        <input type="number" step="0.01" id="ssrS1" value="0.42" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-rose-500">
+                    </div>
+                    <div>
+                        <label class="text-slate-400 block mb-1"><i class="fa-solid fa-gauge"></i> Vs30 Site-Specific (m/s)</label>
+                        <input type="number" step="10" id="ssrVs30" value="280" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-rose-500">
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 pt-1">
+                    <button onclick="runSeismicCalc()" class="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-md shadow-rose-600/40 transition-all">
+                        <i class="fa-solid fa-play"></i> HITUNG SPEKTRUM RESPONS DESAIN
+                    </button>
+                    <button onclick="exportSeismicPDF()" class="px-3 py-2 rounded-lg bg-rose-900 hover:bg-rose-800 text-rose-200 font-bold text-xs border border-rose-500/60 transition">
+                        <i class="fa-solid fa-file-lines"></i> PDF SITE REPORT
+                    </button>
+                    <button onclick="exportSeismicXLSX()" class="px-3 py-2 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs border border-emerald-500/60 transition">
+                        <i class="fa-solid fa-file-excel"></i> EXCEL
+                    </button>
+                    <span class="text-[10px] text-slate-500 font-mono">Nilai default: Peta PuSGeN 2024 titik Pad C Extension Banyuwangi (MDE 2% dalam 50 tahun)</span>
+                </div>
+            </div>
+
+            <!-- PANEL HASIL PERHITUNGAN SNI 1726:2019 -->
+            <div class="cmd-panel p-5 space-y-3" id="ssrResultPanel">
+                <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2"><i class="fa-solid fa-square-root-variable text-amber-400"></i> PARAMETER RESPONS SEISMIK DESAIN</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 text-[11px] font-mono" id="ssrCards">
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Faktor Situs Fa</span><div class="text-lg font-bold text-amber-400 mt-1" id="dispSsrFa">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Faktor Situs Fv</span><div class="text-lg font-bold text-amber-400 mt-1" id="dispSsrFv">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">SMS = Fa·Ss</span><div class="text-lg font-bold text-orange-400 mt-1" id="dispSsrSMS">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">SM1 = Fv·S1</span><div class="text-lg font-bold text-orange-400 mt-1" id="dispSsrSM1">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-rose-500/50"><span class="text-slate-400">SDS (2/3·SMS)</span><div class="text-lg font-bold text-rose-400 mt-1" id="dispSsrSDS">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-rose-500/50"><span class="text-slate-400">SD1 (2/3·SM1)</span><div class="text-lg font-bold text-rose-400 mt-1" id="dispSsrSD1">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">T0 = 0.2·SD1/SDS</span><div class="text-lg font-bold text-cyan-300 mt-1" id="dispSsrT0">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Ts = SD1/SDS</span><div class="text-lg font-bold text-cyan-300 mt-1" id="dispSsrTs">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">TL (SNI Tabel 5)</span><div class="text-lg font-bold text-cyan-300 mt-1">4.000 s</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">Faktor Keutamaan Ie</span><div class="text-lg font-bold text-purple-400 mt-1" id="dispSsrIe">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-purple-500/50"><span class="text-slate-400">Kategori Desain</span><div class="text-lg font-bold text-purple-400 mt-1" id="dispSsrKDS">—</div></div>
+                    <div class="p-2.5 rounded bg-slate-900 border border-slate-800"><span class="text-slate-400">kh Pseudo-Statis (0.5·PGA)</span><div class="text-lg font-bold text-emerald-400 mt-1" id="dispSsrKh">—</div></div>
+                </div>
+                <div class="text-[10px] font-mono text-slate-400 bg-slate-950/60 border border-slate-800 rounded-lg px-3 py-2" id="ssrKdsNote">Tekan HITUNG untuk memproses parameter SNI 1726:2019 & PuSGeN 2024.</div>
+            </div>
+
+            <!-- GRAFIK SPEKTRUM RESPONS -->
+            <div class="cmd-panel p-5 space-y-3">
+                <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2"><i class="fa-solid fa-chart-line text-cyan-400"></i> KURVA SPEKTRUM RESPONS PERCEPATAN — TITIK TERPILIH PAD C</h3>
+                <div class="h-[340px]"><canvas id="seismicSpectrumChart"></canvas></div>
+            </div>
+
+            <!-- TABEL SPEKTRUM DESAIN -->
+            <div class="cmd-panel p-5 space-y-3">
+                <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2"><i class="fa-solid fa-table text-cyan-400"></i> TABEL NILAI SPEKTRUM RESPONS PERCEPATAN (PERIODE 0–4 DETIK)</h3>
+                <div class="max-h-72 overflow-y-auto rounded-lg border border-slate-800">
+                    <table class="w-full text-[11px] font-mono">
+                        <thead class="bg-slate-950 text-slate-300 sticky top-0">
+                            <tr>
+                                <th class="p-2 border-b border-slate-800 text-left">Periode T (detik)</th>
+                                <th class="p-2 border-b border-slate-800 text-right">Sa Desain — SDS/SD1 (g)</th>
+                                <th class="p-2 border-b border-slate-800 text-right">Sa MCE — SMS/SM1 (g)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ssrSpectrumTable" class="divide-y divide-slate-800 text-slate-300"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SPEKTRUM SPESIFIK SITUS MULTI PERIODE ULANG -->
+            <div class="cmd-panel p-5 space-y-3">
+                <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2"><i class="fa-solid fa-layer-group text-purple-400"></i> SPEKTRUM SPESIFIK SITUS (MULTI PERIODE ULANG) — Vs30 TITIK LAPANGAN</h3>
+                <p class="text-[10px] font-mono text-slate-400">Amplifikasi lokal Vs30 + faktor periode ulang (mengikuti metodologi site-specific spectrum PuSGeN/SNI, model aplikasi Seismic Site Report Pro). Spektrum batuan dasar titik Pad C diskalakan terhadap kelas tanah aktual.</p>
+                <div class="overflow-x-auto rounded-lg border border-slate-800">
+                    <table class="w-full text-[11px] font-mono whitespace-nowrap">
+                        <thead class="bg-slate-950 text-slate-300">
+                            <tr>
+                                <th class="p-2">Periode Ulang (Tahun)</th>
+                                <th class="p-2">PGA (g)</th>
+                                <th class="p-2">T = 0.1s</th>
+                                <th class="p-2">T = 0.2s</th>
+                                <th class="p-2">T = 0.3s</th>
+                                <th class="p-2">T = 0.6s</th>
+                                <th class="p-2">T = 1.0s</th>
+                                <th class="p-2">T = 2.0s</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ssrSiteSpecificTable" class="divide-y divide-slate-800 text-slate-300"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 6 PENJELASAN SPESIFIK -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="cmd-panel p-4 space-y-2">
+                    <h4 class="text-xs font-bold text-rose-300"><i class="fa-solid fa-earthquake"></i> 1. SEISMOTEKTONIK &amp; PERCEPATAN PUNCAK TITIK</h4>
+                    <p class="text-[11px] font-mono text-slate-300 leading-relaxed" id="ssrExpl1">Titik Pad C Extension (-8.5985, 114.0375) berada pada busur depan subduksi Lempeng Indo-Australia di bawah Jawa Timur — dominasi ancaman megathrust Selat/parit Jawa Selatan dengan potensi M 8.7–8.9 (PuSGeN 2024). Gempa kerak dangkal Sesar Kendeng–Selat Bali dan in-slab menengah turut berkontribusi. PGA batuan dasar 0.48 g (MDE 2%/50 th) termasuk kategori bahaya sangat tinggi nasional.</p>
+                </div>
+                <div class="cmd-panel p-4 space-y-2">
+                    <h4 class="text-xs font-bold text-amber-300"><i class="fa-solid fa-mountain-sun"></i> 2. KELAS SITUS &amp; KARAKTERISTIK TANAH</h4>
+                    <p class="text-[11px] font-mono text-slate-300 leading-relaxed" id="ssrExpl2">Lereng timur Gunung Ijen tersusun endapan piroklastik dan breksi vulkanik beralterasi (humifikasi lanjut). Satuan liner TSF berada di atas profil tanah residual–saprolit; site class SD (180 &lt; Vs30 ≤ 360 m/s) digunakan sesuai survei geofisika tapak.</p>
+                </div>
+                <div class="cmd-panel p-4 space-y-2">
+                    <h4 class="text-xs font-bold text-orange-300"><i class="fa-solid fa-arrow-up-right-dots"></i> 3. AMPLIFIKASI FAKTOR SITUS Fa &amp; Fv</h4>
+                    <p class="text-[11px] font-mono text-slate-300 leading-relaxed" id="ssrExpl3">Fa dan Fv diperoleh dengan interpolasi Tabel 3 &amp; 4 SNI 1726:2019 terhadap Ss dan S1 batuan dasar. Tanah sedang/lunak menguatkan percepatan jangka pendek dan panjang; Fa/Fv inilah yang membedakan spektrum tapak dari spektrum batuan.</p>
+                </div>
+                <div class="cmd-panel p-4 space-y-2">
+                    <h4 class="text-xs font-bold text-purple-300"><i class="fa-solid fa-compass-drafting"></i> 4. PENENTUAN KATEGORI DESAIN SEISMIK (KDS)</h4>
+                    <p class="text-[11px] font-mono text-slate-300 leading-relaxed" id="ssrExpl4">KDS ditentukan dari SDS, SD1, kategori risiko (Tabel 8 &amp; 9 SNI 1726:2019); jika S1 ≥ 0.75 g maka KDS E otomatis (Pasal 6.5). Kategori Risiko IV (fasilitas ekstrem-konsekuensi GISTM) menaikkan Ie = 1.50 dan menuntut sistem struktur daktil penuh dengan detail sempurna.</p>
+                </div>
+                <div class="cmd-panel p-4 space-y-2">
+                    <h4 class="text-xs font-bold text-cyan-300"><i class="fa-solid fa-diagram-project"></i> 5. SPEKTRUM SPESIFIK SITUS</h4>
+                    <p class="text-[11px] font-mono text-slate-300 leading-relaxed" id="ssrExpl5">Spektrum spesifik situs menskalakan spektrum batuan PuSGeN dengan amplifikasi Vs30 lapangan dan faktor periode ulang 50–10.000 tahun — alat evaluasi deformasi MDE dan OBE untuk analisis numerik stabilitas lereng Pad C (FLAC/GeoStudio) dengan koefisien kh pseudo-statis.</p>
+                </div>
+                <div class="cmd-panel p-4 space-y-2">
+                    <h4 class="text-xs font-bold text-emerald-300"><i class="fa-solid fa-shield-halved"></i> 6. IMPLIKASI DESAIN PAD C EXTENSION</h4>
+                    <p class="text-[11px] font-mono text-slate-300 leading-relaxed" id="ssrExpl6">Hasil spektrum desain menjadi dasar verifikasi FK seismik ≥ 1.15 (pseudostatik MDE), freeboard PMF + seiche gempa, serta deformasi permanen kriteria ANCOLD/GISTM. TARP seismik lapangan: Level 1 normal → PGA terukur &lt; 0.05 g; Level 3 inspeksi menyeluruh bila PGA &gt; 0.15 g atau percepatan riil mendekati 50% spektrum desain.</p>
+                </div>
+            </div>
+
+            <!-- RIWAYAT GEMPA PENTING -->
+            <div class="cmd-panel p-5 space-y-3">
+                <h3 class="text-sm font-bold text-white border-b border-slate-800 pb-2"><i class="fa-solid fa-clock-rotate-left text-rose-400"></i> GEMPA BERPENGARUH HISTORIS WILAYAH BANYUWANGI</h3>
+                <div class="overflow-x-auto rounded-lg border border-slate-800">
+                    <table class="w-full text-[11px] font-mono whitespace-nowrap">
+                        <thead class="bg-slate-950 text-slate-300">
+                            <tr><th class="p-2">Tanggal</th><th class="p-2">Lokasi / Zona</th><th class="p-2">M</th><th class="p-2">Kedalaman</th><th class="p-2">Efek</th></tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800 text-slate-300">
+                            <tr><td class="p-2">02 Jun 1994</td><td class="p-2">Selatan Banyuwangi (megathrust, tsunami earthquake)</td><td class="p-2 text-rose-400 font-bold">7.2</td><td class="p-2">~18 km</td><td class="p-2">Tsunami 0.5–1.5 m pesisir; guncangan kuat Banyuwangi–Jember</td></tr>
+                            <tr><td class="p-2">03 Jun 1994</td><td class="p-2">Aftershock selatan Jawa</td><td class="p-2 text-orange-400 font-bold">6.0</td><td class="p-2">~33 km</td><td class="p-2">Guncangan lanjutan; evakuasi pesisir</td></tr>
+                            <tr><td class="p-2">17 Jul 2006</td><td class="p-2">Megathrust selatan Jawa (Pangandaran) — ancaman sama untuk tapak</td><td class="p-2 text-rose-400 font-bold">7.7</td><td class="p-2">~34 km</td><td class="p-2">Tsunami skala besar pesisir Jawa; pelajaran mitigasi TSF pesisir</td></tr>
+                            <tr><td class="p-2">10 Apr 2014</td><td class="p-2">Selat Bali — in-slab dekat tapak</td><td class="p-2 text-orange-400 font-bold">6.0</td><td class="p-2">~10 km</td><td class="p-2">Terasa kuat di Banyuwangi; MMIs V–VI</td></tr>
+                            <tr><td class="p-2">13 Nov 2019</td><td class="p-2">Anak Krakatau — jauh namun relevan ancaman volcanic-tsunami</td><td class="p-2 text-amber-400 font-bold">5.6</td><td class="p-2">~10 km</td><td class="p-2">Sirene tsunami selat Sunda; uji kesiapan tanggap darurat</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-[10px] font-mono text-slate-500">Sumber: katalog historis BMKG/USGS/NOAA & PuSGeN 2024. Riwayat menunjukkan dominasi ancaman megathrust dan gempa kerak dangkal Selat Bali.</p>
+            </div>
+
+            <!-- BARIS SUMBER & REFERENSI INTERNET (v2.0 PRO) -->
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-mono bg-slate-950/70 border border-slate-800 rounded-lg px-3 py-2 no-print">
+                <span class="text-slate-500 font-bold uppercase"><i class="fa-solid fa-book-open"></i> Sumber:</span>
+                <a href="https://seismik.bahterasiaga.org/site-report" target="_blank" class="text-sky-400 hover:underline"><i class="fa-solid fa-file-circle-check"></i> Referensi Site-Report Bahtera Siaga</a>
+                <a href="https://pusgen.id" target="_blank" class="text-rose-400 hover:underline"><i class="fa-solid fa-house-crack"></i> PuSGeN (Pusat Studi Gempa Nasional)</a>
+                <a href="https://earthquake.usgs.gov/earthquakes/map/" target="_blank" class="text-orange-400 hover:underline"><i class="fa-solid fa-wave-square"></i> USGS Earthquake</a>
+                <a href="https://id.wikipedia.org/wiki/Megathrust" target="_blank" class="text-emerald-300 hover:underline"><i class="fa-brands fa-wikipedia-w"></i> Wikipedia: Megathrust</a>
+                <a href="https://www.bmkg.go.id" target="_blank" class="text-cyan-300 hover:underline"><i class="fa-solid fa-cloud-bolt"></i> BMKG</a>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 9: LAPORAN RESMI SUPERVISI (A4) ==================== -->
+        <section id="tab-report" class="tab-content hidden">
+            <div class="bg-white text-slate-900 p-8 sm:p-12 rounded-2xl shadow-2xl max-w-4xl mx-auto report-page">
+                <div class="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-start">
+                    <div>
+                        <div class="text-[11px] uppercase font-bold tracking-wider text-slate-600">KONSULTAN SUPERVISI &amp; PENGAWASAN BENDUNGAN TAILING</div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-950 uppercase mt-0.5">BERITA ACARA PENGAWASAN FASILITAS PAD C EXTENSION</h2>
+                        <div class="text-xs text-slate-700">Proyek Tambang Emas Tujuh Bukit • Kec. Pesanggaran, Kab. Banyuwangi</div>
+                    </div>
+                    <div class="text-right text-xs text-slate-600">
+                        <div>Format: GISTM &amp; SNI 1726</div>
+                        <div class="font-bold text-slate-900 mt-0.5">Ref: SUPV-BSI-PADC/2026/Q3</div>
+                        <div class="font-bold text-slate-900" id="repDate">20 September 2026</div>
+                    </div>
+                </div>
+
+                <div class="mb-6 grid grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                        <div><span class="text-slate-500">Pemilik:</span> <strong class="text-slate-900">PT Bumi Suksesindo (BSI)</strong></div>
+                        <div><span class="text-slate-500">Fasilitas:</span> <strong class="text-slate-900">Pad C Extension &amp; PLS Pond</strong></div>
+                        <div><span class="text-slate-500">Tingkat Konsekuensi:</span> <strong class="text-rose-700">Extreme Consequence (GISTM)</strong></div>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                        <div><span class="text-slate-500">Konsultan Pengawas:</span> <strong class="text-slate-900">Tim Supervisi Geoteknik</strong></div>
+                        <div><span class="text-slate-500">Gempa Desain:</span> <strong class="text-slate-900">PGA = 0.48g (PuSGeN 2024 MDE)</strong></div>
+                        <div><span class="text-slate-500">Status Operasi:</span> <strong class="text-emerald-700 font-bold">TARP LEVEL 1 (NORMAL)</strong></div>
+                    </div>
+                </div>
+
+                <div class="mb-6 space-y-3 text-xs">
+                    <h3 class="font-bold uppercase tracking-wider text-slate-900 border-b pb-1">I. Hasil Evaluasi Kestabilan Fisik &amp; QA/QC</h3>
+                    <table class="w-full border border-slate-300">
+                        <thead class="bg-slate-100 text-slate-700">
+                            <tr>
+                                <th class="p-2 border text-left">Parameter Supervisi</th>
+                                <th class="p-2 border text-center">Standar</th>
+                                <th class="p-2 border text-center">Hasil Uji Lapangan</th>
+                                <th class="p-2 border text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="p-2 border font-medium">Stabilitas Lereng Statis</td><td class="p-2 border text-center">≥ 1.50</td><td class="p-2 border text-center font-bold text-emerald-800">1.68</td><td class="p-2 border text-center text-emerald-700 font-bold">MEMENUHI</td></tr>
+                            <tr><td class="p-2 border font-medium">Stabilitas Seismik MDE</td><td class="p-2 border text-center">≥ 1.15</td><td class="p-2 border text-center font-bold text-blue-800">1.24</td><td class="p-2 border text-center text-blue-700 font-bold">MEMENUHI</td></tr>
+                            <tr><td class="p-2 border font-medium">Tekanan Pori (VWP-01)</td><td class="p-2 border text-center">&lt; 60.0 kPa</td><td class="p-2 border text-center font-bold">42.5 kPa</td><td class="p-2 border text-center text-emerald-700 font-bold">AMAN</td></tr>
+                            <tr><td class="p-2 border font-medium">Uji Saluran Las HDPE</td><td class="p-2 border text-center">210 kPa / 5 mnt</td><td class="p-2 border text-center font-bold">100% Lolos Uji</td><td class="p-2 border text-center text-emerald-700 font-bold">MEMENUHI</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8 text-xs pt-4 border-t border-slate-300">
+                    <div class="text-center space-y-12">
+                        <div>Konsultan Supervisi Geoteknik,<br><span class="font-bold text-slate-900">Lead Dam Safety Engineer</span></div>
+                        <div><u>( Ir. Mohamad Hartadi )</u><br>SKA Ahli Utama Bendungan Besar</div>
+                    </div>
+                    <div class="text-center space-y-12">
+                        <div>Menyetujui Pengelola Tambang,<br><span class="font-bold text-slate-900">Kepala Teknik Tambang (KTT)</span></div>
+                        <div><u>( ..................................................... )</u><br>PT Bumi Suksesindo</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER KREDIT DEVELOPER (v2.0 PRO) -->
+    <footer class="mt-auto bg-[#040a18] border-t border-amber-600/40 py-2.5 px-3 no-print">
+        <div class="max-w-full flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-4 text-[10px] sm:text-[11px] font-mono text-slate-400">
+            <span class="text-amber-400 font-bold"><i class="fa-solid fa-code"></i> Developed by <b class="text-amber-300">Ir. Mohamad Hartadi</b> — Civil Engineer &amp; AI System Developer</span>
+            <span class="hidden sm:inline text-slate-600">|</span>
+            <a href="https://facebook.com/m.hartadi" target="_blank" class="text-blue-400 hover:text-blue-300"><i class="fa-brands fa-facebook"></i> m.hartadi</a>
+            <span class="hidden sm:inline text-slate-600">|</span>
+            <a href="https://newbieonline7.blogspot.com" target="_blank" class="text-amber-400 hover:text-amber-300"><i class="fa-solid fa-blog"></i> newbieonline7.blogspot.com</a>
+            <span class="hidden sm:inline text-slate-600">|</span>
+            <a href="https://wa.me/6282231036047" target="_blank" class="text-emerald-400 hover:text-emerald-300"><i class="fa-brands fa-whatsapp"></i> 0822-3103-6047</a>
+        </div>
+        <div class="text-center text-[9px] font-mono text-slate-500 mt-1">© 2026 PAD C EXTENSION TSF v2.1 PRO — GISTM 2020 • SNI 1726 • PuSGeN 2024</div>
+    </footer>
+
+    <!-- FLOATING CHATBOT WIDGET -->
+    <div class="fixed bottom-5 right-5 z-[900] no-print">
+        <button onclick="toggleChatWindow()" class="flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-amber-600 via-yellow-500 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-slate-950 font-black shadow-[0_0_25px_rgba(245,158,11,0.5)] border border-amber-300/40 hover:scale-105 transition-all">
+            <span class="w-3 h-3 rounded-full bg-emerald-400 absolute -top-1 -right-1 border-2 border-slate-900 pulse-live"></span>
+            <i class="fa-solid fa-brain text-lg"></i>
+            <div class="text-left leading-tight hidden sm:block">
+                <span class="text-xs font-tech tracking-wide block text-slate-950">AI GEOCONSULT</span>
+                <span class="text-[9px] text-slate-900 font-mono font-bold">Supervisi Pad C &amp; Cuaca</span>
+            </div>
+        </button>
+    </div>
+
+    <!-- AI Chatbot Drawer -->
+    <div id="chatDrawer" class="chat-drawer closed fixed bottom-5 right-3 sm:right-6 z-[950] w-[95vw] sm:w-[490px] h-[640px] max-h-[90vh] bg-[#070e1f] border-2 border-amber-500/60 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden backdrop-blur-xl no-print">
+        <div class="p-3.5 bg-gradient-to-r from-slate-950 via-[#0f1b38] to-amber-950 border-b border-amber-500/40 flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-600/30 border border-amber-400/80 flex items-center justify-center text-amber-300 text-base shadow-md">
+                    <i class="fa-solid fa-brain text-amber-400"></i>
+                </div>
+                <div>
+                    <h3 class="font-tech text-xs sm:text-sm font-black text-white tracking-wider flex items-center gap-1.5">
+                        <span>GEOCONSULT TSF SUPERAGENT</span>
+                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-500 font-mono">PRO</span>
+                    </h3>
+                    <p class="text-[10px] text-slate-400 font-mono">Asisten Pengawas Konstruksi &amp; Cuaca Pad C Banyuwangi</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-0.5">
+                <button onclick="toggleMute()" id="btnMuteTts" class="p-1.5 hover:text-white text-slate-400" title="Hidupkan / matikan suara TTS"><i class="fa-solid fa-volume-high"></i></button>
+                <button onclick="openVoiceModal()" class="p-1.5 hover:text-white text-slate-400" title="Pengaturan Suara (TTS)"><i class="fa-solid fa-sliders"></i></button>
+                <button onclick="clearChatHistory()" class="p-1.5 hover:text-white text-slate-400" title="Bersihkan riwayat chat"><i class="fa-solid fa-broom"></i></button>
+                <button onclick="toggleChatWindow()" class="p-1.5 hover:text-white text-slate-400"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+        </div>
+
+        <div class="p-2 bg-[#040814] border-b border-amber-800/30 flex items-center gap-1.5 overflow-x-auto shrink-0 text-xs font-mono">
+            <button onclick="triggerChatPreset('kestabilan lereng')" class="px-2.5 py-1 rounded bg-amber-950 hover:bg-amber-900 border border-amber-500/60 text-amber-300 font-bold text-[10px] whitespace-nowrap">📊 Stabilitas Pad C</button>
+            <button onclick="triggerChatPreset('prediksi cuaca')" class="px-2.5 py-1 rounded bg-cyan-950 hover:bg-cyan-900 border border-cyan-500/60 text-cyan-300 font-bold text-[10px] whitespace-nowrap">🌦️ Cuaca &amp; Hujan</button>
+            <button onclick="triggerChatPreset('hujan gev pmp')" class="px-2.5 py-1 rounded bg-indigo-950 hover:bg-indigo-900 border border-indigo-500/60 text-indigo-300 font-bold text-[10px] whitespace-nowrap">💧 GEV &amp; PMP</button>
+            <button onclick="triggerChatPreset('gempa megathrust')" class="px-2.5 py-1 rounded bg-rose-950 hover:bg-rose-900 border border-rose-500/60 text-rose-300 font-bold text-[10px] whitespace-nowrap">⚡ Gempa PuSGeN</button>
+            <button onclick="triggerChatPreset('programmer')" class="px-2.5 py-1 rounded bg-purple-950 hover:bg-purple-900 border border-purple-500/60 text-purple-300 font-bold text-[10px] whitespace-nowrap">👨‍💻 Lead Engineer</button>
+        </div>
+
+        <div id="chatMessages" class="flex-1 p-3.5 overflow-y-auto space-y-3 text-xs text-slate-200 bg-[#040916]">
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-amber-500/40 space-y-2">
+                <span class="font-bold text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-robot"></i> GeoConsult TSF Intelligence</span>
+                <p class="text-slate-300 text-[11px] leading-relaxed">
+                    Halo! Saya asisten supervisi geoteknik fasilitas <strong>Pad C Extension &amp; Tailings Dam Banyuwangi</strong>. Saya siap mendiagnosis data sensor, verifikasi kestabilan jenjang lereng, analisis curah hujan ekstrem GEV/PMP, debit banjir, dan gempa Megathrust Jawa Selatan.
+                </p>
+            </div>
+        </div>
+
+        <div class="p-2.5 bg-[#050b18] border-t border-amber-800/40 shrink-0">
+            <form onsubmit="event.preventDefault(); processChat();" class="flex items-center gap-2">
+                <input type="text" id="chatInput" placeholder="Tanyakan kestabilan Pad C, hujan GEV, cuaca..." class="flex-1 bg-[#091226] border border-amber-700/50 rounded-xl px-3 py-2 text-xs text-white font-mono focus:outline-none focus:border-amber-400">
+                <button type="submit" class="p-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 1: EDIT DATA SENSOR -->
+    <div id="modalInputData" class="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+        <div class="cmd-panel max-w-md w-full p-5 space-y-4 border border-amber-500/60 bg-[#071024]">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-amber-400"></i>
+                    <span>Edit Nilai Pengawasan Lapangan Pad C</span>
+                </h3>
+                <button onclick="closeInputModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs font-mono">
+                <div>
+                    <label class="block text-slate-300">Piezometer VWP-01 (Tekanan Pori, kPa):</label>
+                    <input type="number" id="inVwp01" value="42.5" step="0.5" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-300">Laju Inclinometer INC-03 (mm/bulan):</label>
+                    <input type="number" id="inInc03" value="1.2" step="0.1" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-white">
+                </div>
+                <div>
+                    <label class="block text-slate-300">Debit Rembesan LDS Weir (L/detik):</label>
+                    <input type="number" id="inWeir02" value="0.85" step="0.05" class="w-full bg-slate-950 border border-slate-700 rounded p-1.5 text-white">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button onclick="closeInputModal()" class="flex-1 py-2 rounded bg-slate-800 text-slate-300 font-bold">Batal</button>
+                    <button onclick="saveInputData()" class="flex-1 py-2 rounded bg-amber-600 text-slate-950 font-bold">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: DIREKTORI 57 APLIKASI (MY APPS) -->
+    <div id="modalApps" class="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+        <div class="cmd-panel max-w-4xl w-full p-5 space-y-4 border border-purple-500/60 bg-[#070e22] max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-cubes-stacked text-purple-400 text-lg"></i>
+                    <h3 class="font-tech text-sm font-bold text-white tracking-wider">DIREKTORI 57 APLIKASI WEB KARYA IR. MOHAMAD HARTADI</h3>
+                </div>
+                <button onclick="closeAppsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            
+            <input type="text" id="appFilterInput" oninput="filterApps(this.value)" placeholder="Cari nama aplikasi (contoh: dam, seismik, uscs, radar, dokter)..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white font-mono">
+            
+            <div id="appsListContainer" class="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-xs font-mono pr-1">
+                <!-- Rendered dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: PROFIL DEVELOPER -->
+    <div id="modalDev" class="fixed inset-0 z-[1000] bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 no-print">
+        <div class="cmd-panel max-w-md w-full p-5 space-y-4 border border-amber-500/60 bg-[#071024]">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h3 class="font-tech text-sm font-bold text-white">PROFIL LEAD SUPERVISION CONSULTANT</h3>
+                <button onclick="closeDevModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs text-slate-300">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-600 to-yellow-400 flex items-center justify-center text-slate-950 text-2xl font-bold">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white text-sm">Ir. Mohamad Hartadi</h4>
+                        <p class="text-[11px] text-amber-400">Civil &amp; Geotechnical Dam Safety Engineer</p>
+                    </div>
+                </div>
+                <p class="text-[11px] text-slate-300 leading-relaxed">
+                    Praktisi teknik sipil pengairan dan geoteknik bendungan dengan spesialisasi evaluasi stabilitas lereng, rembesan freatik, pemodelan gempa PuSGeN, serta rancang bangun sistem komputasi web rekayasa.
+                </p>
+                <div class="space-y-1.5 pt-1">
+                    <a href="https://wa.me/6282231036047" target="_blank" class="p-2 rounded bg-[#040a18] border border-emerald-600/60 text-emerald-300 flex items-center justify-between">
+                        <span><i class="fa-brands fa-whatsapp text-emerald-400 mr-2"></i> WhatsApp: 082231036047</span>
+                        <span class="text-[10px] bg-emerald-950 px-2 py-0.5 rounded">Chat Langsung</span>
+                    </a>
+                    <a href="https://github.com/AdiKds" target="_blank" class="p-2 rounded bg-[#040a18] border border-slate-700 text-slate-300 flex items-center justify-between">
+                        <span><i class="fa-brands fa-github text-white mr-2"></i> GitHub: github.com/AdiKds</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP MODAL (v2.0 PRO) -->
+    <div id="helpModal" class="fixed inset-0 z-[960] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 no-print">
+        <div class="bg-[#070e1f] border-2 border-sky-500/60 rounded-2xl w-full max-w-lg p-5 space-y-3 max-h-[88vh] overflow-y-auto">
+            <div class="flex items-center justify-between">
+                <h3 class="font-tech font-black text-white tracking-wider text-sm"><i class="fa-solid fa-circle-question text-sky-400"></i> BANTUAN &amp; METRIK SISTEM</h3>
+                <button onclick="closeHelpModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-center text-[11px] font-mono">
+                <div class="bg-slate-950 border border-slate-800 rounded-lg p-2"><div class="text-amber-400 font-black text-base">9</div><div class="text-slate-400">MODUL ANALISIS</div></div>
+                <div class="bg-slate-950 border border-slate-800 rounded-lg p-2"><div class="text-emerald-400 font-black text-base">57</div><div class="text-slate-400">APLIKASI TERHUBUNG</div></div>
+                <div class="bg-slate-950 border border-slate-800 rounded-lg p-2"><div class="text-cyan-400 font-black text-base">TTS</div><div class="text-slate-400">BACA JAWABAN AI</div></div>
+                <div class="bg-slate-950 border border-slate-800 rounded-lg p-2"><div class="text-rose-400 font-black text-base">PDF/EXCEL</div><div class="text-slate-400">EKSPOR BERITA ACARA</div></div>
+            </div>
+            <div class="text-[11px] font-mono text-slate-300 space-y-1.5 leading-relaxed">
+                <p><b class="text-amber-400">1. TAB COMMAND:</b> Peta komando Pad C dengan 3 basemap + fokus fasilitas + Google Earth 3D + data VWP/deformasi real-time (dapat diedit via EDIT DATA).</p>
+                <p><b class="text-cyan-400">2. TAB CUACA:</b> Prakiraan 7 hari + tabel parameter + grafik Chart.js, sumber BMKG/Windy.</p>
+                <p><b class="text-indigo-300">3. WINDY:</b> Radar angin, hujan, gelombang satelit lapangan Tambang Tujuh Bukit.</p>
+                <p><b class="text-orange-400">4. IKLIM:</b> Tren iklim &amp; anomali global (BMKG/IPCC).</p>
+                <p><b class="text-blue-300">5. GEV &amp; PMP:</b> Analisis hujan ekstrem distribusi nilai ekstrem umum + probable maximum precipitation.</p>
+                <p><b class="text-sky-300">6. BANJIR:</b> Hidrograf satuan sintetis Nakayasu untuk inflow ke PLS Pond.</p>
+                <p><b class="text-emerald-300">7. QA/QC:</b> Uji saluran las HDPE, densitas, dan checklist GISTM.</p>
+                <p><b class="text-rose-300">8. GEMPA:</b> Data PuSGeN 2024, PGA 0.48g, riwayat gempa Banyuwangi.</p>
+                <p><b class="text-slate-200">9. BERITA ACARA:</b> Laporan pengawasan resmi — Cetak A4, Excel, atau PDF profesional.</p>
+                <p><b class="text-amber-400">AI GEOCONSULT:</b> Chatbot dengan basis pengetahuan supervisi + pencarian Wikipedia (ID/EN) + sumber berwarna (Google/Copilot/Gemini/Bing). Jawaban dibacakan otomatis (TTS) — bisa di-mute dari ikon speaker di header chat.</p>
+                <p><b class="text-purple-300">MY APPS:</b> 57 aplikasi GitHub Pages portofolio Ir. Mohamad Hartadi.</p>
+            </div>
+            <div class="text-center text-[10px] font-mono text-slate-500 border-t border-slate-800 pt-2">PAD C EXTENSION TSF v2.1 PRO — Build 2026.09.20</div>
+        </div>
+    </div>
+
+    <!-- VOICE SETTINGS MODAL (SIRI TTS) -->
+    <div id="voiceModal" class="fixed inset-0 z-[965] hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4 no-print">
+        <div class="bg-[#070e1f] border-2 border-amber-500/60 rounded-2xl w-full max-w-sm p-5 space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="font-tech font-black text-white tracking-wider text-sm"><i class="fa-solid fa-sliders text-amber-400"></i> PENGATURAN SUARA (TTS)</h3>
+                <button onclick="closeVoiceModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-base"></i></button>
+            </div>
+            <div class="space-y-2.5 text-[11px] font-mono">
+                <div>
+                    <label class="text-slate-400 block mb-1"><i class="fa-solid fa-comment-dots"></i> SUARA (VOICE)</label>
+                    <select id="voiceSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-white outline-none focus:border-amber-500"></select>
+                </div>
+                <div>
+                    <label class="text-slate-400 block mb-1"><i class="fa-solid fa-gauge-high"></i> KECEPATAN: <span id="lblRate" class="text-amber-300 font-bold">1.0x</span></label>
+                    <input type="range" id="voiceRate" min="0.5" max="1.8" step="0.1" value="1" class="w-full accent-amber-500" oninput="updateVoiceSliders()">
+                </div>
+                <div>
+                    <label class="text-slate-400 block mb-1"><i class="fa-solid fa-music"></i> NADA (PITCH): <span id="lblPitch" class="text-amber-300 font-bold">1.0</span></label>
+                    <input type="range" id="voicePitch" min="0.5" max="1.8" step="0.1" value="1" class="w-full accent-amber-500" oninput="updateVoiceSliders()">
+                </div>
+                <div>
+                    <label class="text-slate-400 block mb-1"><i class="fa-solid fa-volume-low"></i> VOLUME: <span id="lblVolume" class="text-amber-300 font-bold">100%</span></label>
+                    <input type="range" id="voiceVolume" min="0" max="1" step="0.05" value="1" class="w-full accent-amber-500" oninput="updateVoiceSliders()">
+                </div>
+                <div class="flex gap-2 pt-1">
+                    <button onclick="testVoice()" class="flex-1 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold"><i class="fa-solid fa-play"></i> TES SUARA</button>
+                    <button onclick="closeVoiceModal()" class="flex-1 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">Selesai</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREENSAVER OVERLAY (v2.0 PRO) -->
+    <div id="screensaver" class="fixed inset-0 z-[970] hidden bg-[#020610] cursor-pointer no-print">
+        <canvas id="ssCanvas" class="absolute inset-0 w-full h-full"></canvas>
+        <div class="absolute inset-0 flex flex-col items-center justify-center gap-3 pointer-events-none">
+            <div class="font-tech text-xl sm:text-4xl font-black tracking-[0.25em] text-amber-400">PAD C EXTENSION</div>
+            <div class="font-tech text-sm sm:text-2xl text-slate-300 tracking-widest">TSF SUPERVISION SUITE — BANYUWANGI</div>
+            <div id="ssClock" class="font-tech text-4xl sm:text-7xl font-black text-white mt-2">--:--:--</div>
+            <div id="ssDate" class="text-slate-400 font-mono text-xs sm:text-sm uppercase tracking-widest">memuat tanggal</div>
+            <div class="w-1 h-10 sm:w-1.5 sm:h-14 bg-amber-500/70 my-2"></div>
+            <div id="ssTicker" class="text-emerald-300 font-mono text-[10px] sm:text-sm max-w-[85vw] text-center">TARP LEVEL 1 — SEMUA PARAMETER SUPERVISI DALAM BATAS AMAN</div>
+            <div class="text-slate-600 text-[9px] sm:text-[10px] font-mono mt-4">KETUK LAYAR ATAU TEKAN TOMBOL APA PUN UNTUK KEMBALI</div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC SYSTEM LENGKAP -->
+    <script>
+        // Koordinat Pad C Extension Banyuwangi
+        const PAD_C_COORDS = [-8.59850, 114.03750];
+
+        let mapCmdInstance = null;
+        let mapCmdBaseLayer = null;
+        let currentLayerType = 'sat';
+
+        // 1. INSIALISASI CLOCK REALTIME INDONESIA
+        function initClock() {
+            function update() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateStr = now.toLocaleDateString('id-ID', options);
+                const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' WIB';
+                
+                const clockEl = document.getElementById('topSupervisionClock');
+                if (clockEl) clockEl.innerText = `${dateStr} | ${timeStr}`;
+
+                const repDateEl = document.getElementById('repDate');
+                if (repDateEl) repDateEl.innerText = dateStr;
+            }
+            update();
+            setInterval(update, 1000);
+        }
+
+        // 2. KONTROL PETA FOKUS & LAYER SWITCHER (RESPONSIF & BEBAS ERROR)
+        function initCommandMap() {
+            if (mapCmdInstance) return;
+
+            mapCmdInstance = L.map('commandLeafletMap', {
+                center: PAD_C_COORDS,
+                zoom: 15,
+                maxZoom: 18,
+                zoomControl: true
+            });
+
+            // Default Layer: Esri World Imagery (HD Satelit)
+            mapCmdBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: '&copy; Esri World Imagery HD',
+                maxZoom: 18
+            }).addTo(mapCmdInstance);
+
+            drawPadCGeometries(mapCmdInstance);
+        }
+
+        function focusPadC() {
+            if (!mapCmdInstance) return;
+            mapCmdInstance.flyTo(PAD_C_COORDS, 15, { duration: 1.2 });
+            setTimeout(() => { mapCmdInstance.invalidateSize(true); }, 300);
+        }
+
+        function setMapBaseLayer(layerType) {
+            if (!mapCmdInstance) return;
+            currentLayerType = layerType;
+
+            if (mapCmdBaseLayer) {
+                mapCmdInstance.removeLayer(mapCmdBaseLayer);
+            }
+
+            const btnSat = document.getElementById('btnLayerSat');
+            const btnTopo = document.getElementById('btnLayerTopo');
+            const btnOsm = document.getElementById('btnLayerOsm');
+            const indicator = document.getElementById('mapLayerIndicator');
+
+            btnSat.className = "px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-bold text-[10px] border border-slate-700 hover:bg-slate-700";
+            btnTopo.className = "px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-bold text-[10px] border border-slate-700 hover:bg-slate-700";
+            btnOsm.className = "px-2.5 py-1 rounded bg-slate-800 text-slate-300 font-bold text-[10px] border border-slate-700 hover:bg-slate-700";
+
+            if (layerType === 'sat') {
+                mapCmdBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '&copy; Esri World Imagery HD',
+                    maxZoom: 18
+                });
+                btnSat.className = "px-2.5 py-1 rounded bg-cyan-700 text-white font-bold text-[10px] border border-cyan-400";
+                indicator.innerText = "Layer: Esri World Imagery (HD Satelit)";
+            } else if (layerType === 'topo') {
+                mapCmdBaseLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenTopoMap contributors',
+                    maxZoom: 17
+                });
+                btnTopo.className = "px-2.5 py-1 rounded bg-cyan-700 text-white font-bold text-[10px] border border-cyan-400";
+                indicator.innerText = "Layer: Kontur Topografi & Relief";
+            } else if (layerType === 'osm') {
+                mapCmdBaseLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19
+                });
+                btnOsm.className = "px-2.5 py-1 rounded bg-cyan-700 text-white font-bold text-[10px] border border-cyan-400";
+                indicator.innerText = "Layer: OpenStreetMap Vektor";
+            }
+
+            mapCmdBaseLayer.addTo(mapCmdInstance);
+            mapCmdInstance.invalidateSize(true);
+        }
+
+        function toggleMapFullscreen() {
+            const el = document.getElementById('mapWrapper');
+            if (!document.fullscreenElement) {
+                el.requestFullscreen().catch(err => alert("Fullscreen tidak didukung"));
+            } else {
+                document.exitFullscreen();
+            }
+            setTimeout(() => { mapCmdInstance.invalidateSize(true); }, 200);
+        }
+
+        // Fitur Spasial Pad C Extension Sesuai Peta Avenza
+        function drawPadCGeometries(mapObj) {
+            // Tanggul Penahan Perimeter (Merah)
+            const perimeterCoords = [
+                [-8.5942, 114.0320], [-8.5930, 114.0345], [-8.5925, 114.0370],
+                [-8.5932, 114.0410], [-8.5955, 114.0435], [-8.5995, 114.0445],
+                [-8.6030, 114.0440], [-8.6045, 114.0425], [-8.6035, 114.0380],
+                [-8.6015, 114.0340], [-8.5980, 114.0325], [-8.5942, 114.0320]
+            ];
+            L.polyline(perimeterCoords, { color: '#ef4444', weight: 4.5, dashArray: '6, 4' })
+                .bindTooltip("<b>Perimeter Bund Pad C Extension</b><br>Tinggi H = 72.0 m (6 Jenjang)")
+                .addTo(mapObj);
+
+            // Kolam PLS & Event Pond (Cyan / Hijau Biru)
+            const plsPondCoords = [
+                [-8.6002, 114.0335], [-8.5990, 114.0350], [-8.6010, 114.0365],
+                [-8.6022, 114.0350], [-8.6002, 114.0335]
+            ];
+            L.polygon(plsPondCoords, { color: '#06b6d4', fillColor: '#0891b2', fillOpacity: 0.65, weight: 2 })
+                .bindPopup("<b>Pregnant Leach Solution (PLS) Pond</b><br>Kapasitas: 45.000 m³<br>Double HDPE Liner 2.0 mm")
+                .addTo(mapObj);
+
+            const stormPondCoords = [
+                [-8.6025, 114.0355], [-8.6018, 114.0370], [-8.6032, 114.0380],
+                [-8.6040, 114.0365], [-8.6025, 114.0355]
+            ];
+            L.polygon(stormPondCoords, { color: '#10b981', fillColor: '#059669', fillOpacity: 0.55, weight: 2 })
+                .bindPopup("<b>Stormwater Event Pond</b><br>Kapasitas: 85.000 m³ (Lolos Debit PMF)")
+                .addTo(mapObj);
+
+            // Jaringan Pipa Kolektor (Biru)
+            const pipeLine1 = [[-8.5935, 114.0370], [-8.5965, 114.0365], [-8.5995, 114.0355]];
+            const pipeLine2 = [[-8.5940, 114.0395], [-8.5975, 114.0380], [-8.6000, 114.0358]];
+            L.polyline(pipeLine1, { color: '#38bdf8', weight: 3 }).bindTooltip("Pipa Kolektor Utama PLS Line 1").addTo(mapObj);
+            L.polyline(pipeLine2, { color: '#38bdf8', weight: 3 }).bindTooltip("Pipa Kolektor Utama PLS Line 2").addTo(mapObj);
+
+            // Titik Sensor Instrumentasi
+            const sensors = [
+                { name: "Piezometer VWP-01 (Kaki Hilir Tanggul)", lat: -8.6030, lon: 114.0430, val: "42.5 kPa (Normal)" },
+                { name: "Inclinometer INC-03 (Bench 4 Lereng)", lat: -8.5960, lon: 114.0390, val: "1.2 mm/bulan (Stabil)" },
+                { name: "LDS Sump Weir 02 (Underdrain)", lat: -8.6005, lon: 114.0345, val: "0.85 L/s (Bebas Lindi Asam)" },
+                { name: "Settlement Pin SP-05 (Mercu Tanggul)", lat: -8.5935, lon: 114.0350, val: "14 mm (Konsolidasi Stabil)" }
+            ];
+
+            sensors.forEach(s => {
+                L.circleMarker([s.lat, s.lon], {
+                    radius: 7.5,
+                    fillColor: '#f59e0b',
+                    color: '#ffffff',
+                    weight: 2,
+                    fillOpacity: 0.95
+                }).bindPopup(`<b>${s.name}</b><br><span style="font-size:11px;">Hasil Terukur: ${s.val}</span>`).addTo(mapObj);
+            });
+        }
+
+        // 3. WINDY RADAR LAYER SWITCHER
+        function setWindyLayer(overlay) {
+            const frame = document.getElementById('windyFrame');
+            if (!frame) return;
+            frame.src = `https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=m%2Fs&zoom=10&overlay=${overlay}&product=ecmwf&level=surface&lat=-8.5985&lon=114.0375&detailLat=-8.5985&detailLon=114.0375&marker=true&message=true`;
+        }
+
+        // 4. CHART.JS CHARTS ENGINES
+        let chartWeatherInstance = null;
+        let chartGevInstance = null;
+        let chartFloodInstance = null;
+
+        function initWeatherForecastChart() {
+            const ctx = document.getElementById('weatherForecastChart');
+            if (!ctx) return;
+            if (chartWeatherInstance) chartWeatherInstance.destroy();
+
+            const labels = ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'];
+            const rainData = [1.2, 0.5, 0.0, 1.8, 4.5, 8.2, 5.4, 2.1];
+            const probData = [25, 20, 15, 35, 55, 75, 65, 40];
+
+            chartWeatherInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Hujan (mm / 3j)', data: rainData, backgroundColor: 'rgba(6, 182, 212, 0.65)', borderColor: '#06b6d4', borderWidth: 1.5, yAxisID: 'yRain' },
+                        { label: 'Peluang (%)', data: probData, type: 'line', borderColor: '#f59e0b', backgroundColor: 'transparent', borderWidth: 2, tension: 0.3, yAxisID: 'yProb' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                        yRain: { type: 'linear', position: 'left', grid: { color: '#1e293b' }, ticks: { color: '#06b6d4' } },
+                        yProb: { type: 'linear', position: 'right', max: 100, grid: { drawOnChartArea: false }, ticks: { color: '#f59e0b' } }
+                    },
+                    plugins: { legend: { labels: { color: '#cbd5e1' } } }
+                }
+            });
+
+            // Populate Table
+            const tbody = document.getElementById('tableWeatherBody');
+            if (tbody) {
+                tbody.innerHTML = '';
+                labels.forEach((t, i) => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-800/40">
+                            <td class="p-2 font-bold text-white">${t} WIB</td>
+                            <td class="p-2 text-right">28°C</td>
+                            <td class="p-2 text-right font-bold text-cyan-300">${rainData[i]} mm</td>
+                            <td class="p-2 text-right text-amber-400">${probData[i]}%</td>
+                            <td class="p-2 text-center"><span class="px-1.5 py-0.5 rounded text-[9px] ${probData[i] > 50 ? 'bg-rose-950 text-rose-300' : 'bg-emerald-950 text-emerald-300'} font-bold">${probData[i] > 50 ? 'Waspada' : 'Kondusif'}</span></td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        function initGevChart() {
+            const ctx = document.getElementById('gevChart');
+            if (!ctx) return;
+            if (chartGevInstance) chartGevInstance.destroy();
+
+            const tLabels = ['2', '5', '10', '25', '50', '100', '1000'];
+            const rGev = [112.5, 148.0, 174.5, 208.0, 232.0, 258.4, 362.0];
+            const pmpLine = new Array(7).fill(618.5);
+
+            chartGevInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: tLabels,
+                    datasets: [
+                        { label: 'GEV Hujan Rencana (Desain Pad C)', data: rGev, borderColor: '#818cf8', backgroundColor: 'rgba(129, 140, 248, 0.15)', borderWidth: 3, fill: true, tension: 0.25 },
+                        { label: 'PMP Hersfield (618.5 mm)', data: pmpLine, borderColor: '#f43f5e', borderDash: [6, 4], borderWidth: 2, fill: false }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Periode Ulang T (Tahun)', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
+                        y: { title: { display: true, text: 'Curah Hujan (mm)', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
+                    },
+                    plugins: { legend: { labels: { color: '#cbd5e1' } } }
+                }
+            });
+        }
+
+        function initFloodChart() {
+            const ctx = document.getElementById('floodChart');
+            if (!ctx) return;
+            if (chartFloodInstance) chartFloodInstance.destroy();
+
+            const times = ['0j', '1j', '2j', '3j', '4j', '5j', '6j', '8j', '10j', '12j'];
+            const q100 = [5, 18, 45, 62.5, 48, 32, 20, 12, 8, 5];
+            const qpmf = [10, 35, 95, 148.0, 115, 78, 52, 28, 16, 10];
+
+            chartFloodInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: times,
+                    datasets: [
+                        { label: 'Banjir Desain Q100 (62.5 m³/s)', data: q100, borderColor: '#38bdf8', borderWidth: 2.5, tension: 0.3, fill: false },
+                        { label: 'Banjir Ekstrem Q_PMF (148.0 m³/s)', data: qpmf, borderColor: '#f43f5e', borderWidth: 3, tension: 0.3, fill: true, backgroundColor: 'rgba(244, 63, 94, 0.15)' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Waktu Aliran (Jam)', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
+                        y: { title: { display: true, text: 'Debit Inflow Q (m³/s)', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
+                    },
+                    plugins: { legend: { labels: { color: '#cbd5e1' } } }
+                }
+            });
+        }
+
+        // 5. NAVIGASI TAB TERPADU
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            const target = document.getElementById(tabId);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('block');
+            }
+
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.className = "tab-btn px-3.5 py-1.5 rounded-lg flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800/70 whitespace-nowrap transition-all border border-transparent";
+            });
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            if (activeBtn) {
+                activeBtn.className = "tab-btn active px-3.5 py-1.5 rounded-lg flex items-center gap-2 whitespace-nowrap transition-all border border-amber-500/40";
+            }
+
+            // Invalidate size canvas & map
+            if (tabId === 'tab-command') {
+                setTimeout(() => { if (mapCmdInstance) mapCmdInstance.invalidateSize(true); }, 150);
+            } else if (tabId === 'tab-weather') {
+                setTimeout(initWeatherForecastChart, 150);
+            } else if (tabId === 'tab-gev') {
+                setTimeout(initGevChart, 150);
+            } else if (tabId === 'tab-flood') {
+                setTimeout(initFloodChart, 150);
+            } else if (tabId === 'tab-seismic') {
+                setTimeout(() => runSeismicCalc(true), 180);
+            }
+        }
+
+        // 6. CHATBOT PINTAR & SHORTCUTS
+        function toggleChatWindow() {
+            const drawer = document.getElementById('chatDrawer');
+            if (drawer.classList.contains('closed')) {
+                drawer.classList.remove('closed');
+                drawer.classList.add('open');
+                document.getElementById('chatInput').focus();
+            } else {
+                drawer.classList.remove('open');
+                drawer.classList.add('closed');
+            }
+        }
+
+        function triggerChatPreset(topic) {
+            document.getElementById('chatInput').value = topic;
+            processChat();
+        }
+
+        async function processChat() {
+            const input = document.getElementById('chatInput');
+            const q = input.value.trim();
+            if (!q) return;
+
+            const box = document.getElementById('chatMessages');
+            box.innerHTML += bubbleUser(q);
+            CHAT_HIST.push({ role: 'user', text: q }); saveChatHistory();
+            input.value = '';
+
+            // TYPING INDICATOR (v2.0)
+            const typingId = 'typing_' + Date.now();
+            box.innerHTML += `<div id="${typingId}" class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700/60 text-slate-400 self-start font-mono text-[11px] flex items-center gap-1.5">
+                <span class="text-cyan-400 font-bold text-[9px]">GEOCONSULT AI:</span>
+                <span class="typing-dot"></span><span class="typing-dot" style="animation-delay:.2s"></span><span class="typing-dot" style="animation-delay:.4s"></span>
+            </div>`;
+            box.scrollTop = box.scrollHeight;
+
+            const lower = q.toLowerCase();
+            let replyHtml = "";
+
+            if (lower.includes('stabilitas') || lower.includes('lereng') || lower.includes('pad c')) {
+                replyHtml = `
+                    <div class="space-y-1.5">
+                        <b class="text-amber-400">Diagnosis Kestabilan Pad C Extension:</b>
+                        <p class="text-slate-200">Fasilitas tumpukan ore 6 jenjang (H=72 m) memiliki Faktor Keamanan statis <b>FK = 1.68</b> (&ge; standar 1.50) dan FK Seismik MDE <b>1.24</b> (&ge; standar 1.15). Sensor VWP-01 mencatat tekanan pori normal 42.5 kPa dan deformasi lateral 1.2 mm/bulan, menunjukkan kestabilan tinggi.</p>
+                    </div>
+                `;
+            } else if (lower.includes('cuaca') || lower.includes('hujan')) {
+                replyHtml = `
+                    <div class="space-y-1.5">
+                        <b class="text-cyan-400">Prakiraan Cuaca Lapangan (Banyuwangi):</b>
+                        <p class="text-slate-200">Suhu terukur 28.5°C, kelembapan 84%, dan akumulasi hujan 24 jam mencapai 24.6 mm. Waspadai hujan konvektif sore hari (14:00 - 18:00 WIB) dengan peluang 75%.</p>
+                    </div>
+                `;
+            } else if (lower.includes('gev') || lower.includes('pmp')) {
+                replyHtml = `
+                    <div class="space-y-1.5">
+                        <b class="text-indigo-400">Analisis Hujan Rencana GEV &amp; PMP:</b>
+                        <p class="text-slate-200">Curah hujan rencana kala ulang 100 tahun R100 adalah <b>258.4 mm</b> dengan rasio kewajaran R100/R2 = 2.30 (memenuhi syarat Balai Bendungan). Nilai PMP Hersfield 24 jam adalah <b>618.5 mm</b>.</p>
+                    </div>
+                `;
+            } else if (lower.includes('gempa') || lower.includes('megathrust')) {
+                replyHtml = `
+                    <div class="space-y-1.5">
+                        <b class="text-rose-400">Bahaya Seismik PuSGeN 2024 Banyuwangi:</b>
+                        <p class="text-slate-200">Percepatan puncak batuan dasar Maximum Design Earthquake (MDE 1:10.000 tahun) sebesar <b>PGA = 0.48g</b>, Ss = 1.05g, S1 = 0.42g dengan koefisien seismik horizontal kh = 0.22g.</p>
+                    </div>
+                `;
+            } else if (lower.includes('spektrum') || lower.includes('sni') || lower.includes('kds') || lower.includes('seismik')) {
+                if (!SSR_RESULT) runSeismicCalc(true);
+                const R = SSR_RESULT;
+                replyHtml = `
+                    <div class="space-y-1.5">
+                        <b class="text-rose-400">Seismic Site Report Pad C (SNI 1726:2019 &amp; PuSGeN 2024):</b>
+                        <p class="text-slate-200">Titik (${R.lat.toFixed(4)}, ${R.lon.toFixed(4)}) kelas situs ${R.soil}: <b>Fa=${R.Fa.toFixed(2)}, Fv=${R.Fv.toFixed(2)}</b> → SDS = <b>${R.SDS.toFixed(3)}g</b>, SD1 = <b>${R.SD1.toFixed(3)}g</b>, T0=${R.T0.toFixed(2)}s, Ts=${R.Ts.toFixed(2)}s, kategori desain <b>KDS ${R.kds}</b> (Risiko ${R.risk}, Ie=${R.Ie.toFixed(2)}). Buka tab GEMPA untuk kurva spektrum lengkap, tabel multi-periode ulang, dan ekspor PDF/Excel.</p>
+                        ${srcRowWiki('seismic site response spectrum SNI 1726', null)}
+                    </div>`;
+            } else if (lower.includes('programmer') || lower.includes('hartadi')) {
+                replyHtml = `
+                    <div class="space-y-1.5">
+                        <b class="text-purple-400">Lead Supervision Consultant:</b>
+                        <p class="text-slate-200"><strong>Ir. Mohamad Hartadi</strong> - Ahli Teknik Sipil Geoteknik, Struktur Hidraulik &amp; Dam Safety Surveillance.</p>
+                        <a href="https://wa.me/6282231036047" target="_blank" class="text-emerald-400 font-bold underline">WhatsApp: 082231036047</a>
+                    </div>
+                `;
+            } else {
+                // FALLBACK WIKIPEDIA LIVE (ID lalu EN) — sumber berwarna seperti aplikasi JARVIS
+                const wiki = await fetchWikipedia(q);
+                if (wiki) {
+                    replyHtml = `
+                        <div class="space-y-1.5">
+                            <b class="text-emerald-400"><i class="fa-brands fa-wikipedia-w"></i> Ensiklopedia Teknis (Wikipedia ${wiki.lang.toUpperCase()}):</b>
+                            <p class="text-slate-200"><b>${wiki.title}</b> — ${wiki.snippet}...</p>
+                            ${srcRowWiki(q, wiki.title)}
+                        </div>`;
+                } else {
+                    replyHtml = `
+                        <div class="space-y-1.5">
+                            <p class="text-slate-200">Pertanyaan teknis Anda mengenai <em>"${q}"</em> dicatat pada sistem supervisi Pad C Extension. Silakan lihat sumber rujukan berikut:</p>
+                            ${srcRowWiki(q, null)}
+                        </div>`;
+                }
+            }
+
+            setTimeout(async () => {
+                const tp = document.getElementById(typingId);
+                if (tp) tp.remove();
+                const bubble = bubbleBot(replyHtml);
+                box.innerHTML += bubble;
+                CHAT_HIST.push({ role: 'bot', text: replyHtml }); saveChatHistory();
+                box.scrollTop = box.scrollHeight;
+                // TTS: bacakan jawaban otomatis (bisa di-mute)
+                speakBot(replyHtml);
+            }, 450 + Math.random() * 500);
+        }
+
+        // 7. EXPORT EXCEL VIA SHEETJS
+        function exportSupervisionXLSX() {
+            if (typeof XLSX === 'undefined') {
+                alert("Library SheetJS sedang dimuat...");
+                return;
+            }
+            const wb = XLSX.utils.book_new();
+            const wsSummary = XLSX.utils.aoa_to_sheet([
+                ["LAPORAN PENGAWASAN KONSULTAN SUPERVISI PAD C EXTENSION"],
+                ["Lokasi:", "Tambang Emas Tujuh Bukit, Banyuwangi"],
+                ["Tanggal:", new Date().toLocaleDateString('id-ID')],
+                [],
+                ["Parameter", "Nilai", "Standar", "Status"],
+                ["FK Statis", 1.68, "≥ 1.50", "MEMENUHI"],
+                ["FK Seismik MDE", 1.24, "≥ 1.15", "MEMENUHI"],
+                ["Piezometer VWP-01", "42.5 kPa", "< 60.0 kPa", "NORMAL"],
+                ["Inclinometer INC-03", "1.2 mm/bln", "< 2.5 mm/bln", "AMAN"],
+                ["Curah Hujan 24 Jam", "24.6 mm", "-", "WASPADA"],
+                ["Debit Banjir Q_PMF", "148.0 m³/s", "Kapasitas Kolam Cukup", "AMAN"]
+            ]);
+            XLSX.utils.book_append_sheet(wb, wsSummary, "Supervisi_PadC");
+            XLSX.writeFile(wb, `Laporan_Supervisi_PadC_Banyuwangi_${new Date().toISOString().slice(0, 10)}.xlsx`);
+        }
+
+        // 8. DIREKTORI 57 APLIKASI
+        const appsData = [
+            { n: "JARVIS AI SuperAgent", u: "https://adikds.github.io/jarvis-ai/", cat: "AI" },
+            { n: "InaTEWS Pro Tsunami", u: "https://adi-kudus.github.io/inatews-pro/", cat: "Disaster" },
+            { n: "Way Apu Dam Command", u: "https://adikds.github.io/WAY-APU-DAM/", cat: "Dam" },
+            { n: "Seismic Site Report", u: "https://adi-kudus.github.io/Seismic-Site-Report-SNI-PuSGeN-2024/", cat: "Seismic" },
+            { n: "AeroRadar Pro ADS-B", u: "https://adikds.github.io/AERORADAR-PRO/", cat: "Aviation" },
+            { n: "USCS Soil Classifier", u: "https://adikds.github.io/UNIFIED-SOIL-CLASSIFICATION-SYSTEM/", cat: "Geotech" },
+            { n: "GeoStruct Pro 20", u: "https://adikds.github.io/GEOSTRUCT-PRO-20-FORMULA-GEOTECHNICAL/", cat: "Geotech" },
+            { n: "Gudang Bulog FEM", u: "https://adikds.github.io/gudang-bulog/", cat: "Structure" },
+            { n: "DSS Sedimen Pantai Demak", u: "https://adikds.github.io/dss-sedimen-pro/", cat: "Coastal" },
+            { n: "Atlas Geoteknik Indonesia", u: "https://adikds.github.io/ATLAS-GEOTEKNIK/", cat: "Geotech" }
+        ];
+
+        function openAppsModal() {
+            document.getElementById('modalApps').classList.remove('hidden');
+            renderAppsList(appsData);
+        }
+        function closeAppsModal() { document.getElementById('modalApps').classList.add('hidden'); }
+        function openDevModal() { document.getElementById('modalDev').classList.remove('hidden'); }
+        function closeDevModal() { document.getElementById('modalDev').classList.add('hidden'); }
+        function openInputModal() { document.getElementById('modalInputData').classList.remove('hidden'); }
+        function closeInputModal() { document.getElementById('modalInputData').classList.add('hidden'); }
+
+        function renderAppsList(list) {
+            const container = document.getElementById('appsListContainer');
+            container.innerHTML = '';
+            list.forEach((app, i) => {
+                container.innerHTML += `
+                    <a href="${app.u}" target="_blank" class="p-2.5 rounded bg-slate-900 border border-slate-800 hover:border-amber-500/50 flex justify-between items-center transition">
+                        <div>
+                            <div class="font-bold text-white">${i+1}. ${app.n}</div>
+                            <div class="text-[10px] text-amber-400 font-sans">${app.cat}</div>
+                        </div>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-slate-500"></i>
+                    </a>
+                `;
+            });
+        }
+
+        function filterApps(q) {
+            const lower = q.toLowerCase();
+            const filtered = appsData.filter(a => a.n.toLowerCase().includes(lower) || a.cat.toLowerCase().includes(lower));
+            renderAppsList(filtered);
+        }
+
+        function saveInputData() {
+            const pwp = parseFloat(document.getElementById('inVwp01').value) || 42.5;
+            const inc = parseFloat(document.getElementById('inInc03').value) || 1.2;
+            const weir = parseFloat(document.getElementById('inWeir02').value) || 0.85;
+
+            document.getElementById('valVwp01').innerText = pwp.toFixed(1) + ' kPa';
+            document.getElementById('valInc03').innerText = inc.toFixed(1) + ' mm/bulan';
+            document.getElementById('valWeir02').innerText = weir.toFixed(2) + ' L/detik';
+
+            // Persistensi localStorage (v2.0 PRO)
+            try {
+                localStorage.setItem('padc_data_v2', JSON.stringify({ pwp, inc, weir, ts: new Date().toISOString() }));
+            } catch(e) {}
+
+            closeInputModal();
+            showToast('Data supervisi berhasil diperbarui & tersimpan di perangkat ini', 'success');
+        }
+
+        // ==================== ENGINE v2.0 PRO: TOAST, TTS, WIKIPEDIA, SCREENSAVER, PDF ====================
+
+        // 9.1 TOAST NOTIFICATION (pengganti alert)
+        function showToast(msg, type = 'info') {
+            const box = document.getElementById('toastContainer');
+            if (!box) return;
+            const colors = {
+                success: 'border-emerald-500/70 text-emerald-200 bg-emerald-950/90',
+                info: 'border-sky-500/70 text-sky-200 bg-sky-950/90',
+                warn: 'border-amber-500/70 text-amber-200 bg-amber-950/90',
+                error: 'border-rose-500/70 text-rose-200 bg-rose-950/90'
+            };
+            const icons = { success: 'fa-circle-check', info: 'fa-circle-info', warn: 'fa-triangle-exclamation', error: 'fa-circle-xmark' };
+            const el = document.createElement('div');
+            el.className = `px-3.5 py-2.5 rounded-xl border backdrop-blur-md shadow-lg font-mono text-[11px] flex items-center gap-2 animate-slideIn ${colors[type] || colors.info}`;
+            el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${msg}</span>`;
+            box.appendChild(el);
+            setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .4s'; setTimeout(() => el.remove(), 400); }, 3200);
+        }
+
+        // 9.2 TTS ENGINE (baca jawaban AI + notifikasi)
+        let TTS_MUTED = false;
+        let TTS_VOICE = null, TTS_RATE = 1.0, TTS_PITCH = 1.0, TTS_VOLUME = 1.0;
+        function initTTS() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('padc_voice_v2') || '{}');
+                if (saved.rate) TTS_RATE = saved.rate;
+                if (saved.pitch) TTS_PITCH = saved.pitch;
+                if (typeof saved.volume === 'number') TTS_VOLUME = saved.volume;
+                if (saved.muted) { TTS_MUTED = true; updateMuteBtn(); }
+                if (!('speechSynthesis' in window)) return;
+                const pick = () => {
+                    const voices = speechSynthesis.getVoices();
+                    const sel = document.getElementById('voiceSelect');
+                    if (sel) {
+                        sel.innerHTML = voices.map((v, i) => `<option value="${i}" ${v.lang.startsWith('id') || /Indones/i.test(v.name) ? 'selected' : ''}>${v.name} (${v.lang})</option>`).join('') || '<option>Suara tidak tersedia di perangkat ini</option>';
+                    }
+                    TTS_VOICE = voices.find(v => v.lang.startsWith('id')) || voices.find(v => v.lang.startsWith('en')) || voices[0] || null;
+                };
+                pick();
+                speechSynthesis.onvoiceschanged = pick;
+            } catch(e) {}
+        }
+        function updateMuteBtn() {
+            const btn = document.getElementById('btnMuteTts');
+            if (btn) btn.innerHTML = TTS_MUTED ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+        }
+        function toggleMute() {
+            TTS_MUTED = !TTS_MUTED;
+            updateMuteBtn();
+            try { localStorage.setItem('padc_voice_v2', JSON.stringify({ rate: TTS_RATE, pitch: TTS_PITCH, volume: TTS_VOLUME, muted: TTS_MUTED })); } catch(e) {}
+            if (!TTS_MUTED) speakBot('Suara aktif.');
+            showToast(TTS_MUTED ? 'Suara TTS dimatikan' : 'Suara TTS dihidupkan', 'info');
+        }
+        function speakBot(text) {
+            if (TTS_MUTED || !('speechSynthesis' in window)) return;
+            try {
+                speechSynthesis.cancel();
+                const clean = String(text).replace(/<[^>]*>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').slice(0, 600);
+                const u = new SpeechSynthesisUtterance(clean);
+                if (TTS_VOICE) u.voice = TTS_VOICE;
+                u.rate = TTS_RATE; u.pitch = TTS_PITCH; u.volume = TTS_VOLUME;
+                u.lang = (TTS_VOICE && TTS_VOICE.lang) || 'id-ID';
+                speechSynthesis.speak(u);
+            } catch(e) {}
+        }
+        function openVoiceModal() { document.getElementById('voiceModal').classList.remove('hidden'); initTTS(); }
+        function closeVoiceModal() { document.getElementById('voiceModal').classList.add('hidden'); }
+        function updateVoiceSliders() {
+            TTS_RATE = parseFloat(document.getElementById('voiceRate').value);
+            TTS_PITCH = parseFloat(document.getElementById('voicePitch').value);
+            TTS_VOLUME = parseFloat(document.getElementById('voiceVolume').value);
+            document.getElementById('lblRate').innerText = TTS_RATE.toFixed(1) + 'x';
+            document.getElementById('lblPitch').innerText = TTS_PITCH.toFixed(1);
+            document.getElementById('lblVolume').innerText = Math.round(TTS_VOLUME * 100) + '%';
+            const sel = document.getElementById('voiceSelect');
+            if (sel && speechSynthesis) { const vs = speechSynthesis.getVoices(); TTS_VOICE = vs[parseInt(sel.value)] || TTS_VOICE; }
+            try { localStorage.setItem('padc_voice_v2', JSON.stringify({ rate: TTS_RATE, pitch: TTS_PITCH, volume: TTS_VOLUME, muted: TTS_MUTED })); } catch(e) {}
+        }
+        function testVoice() {
+            speakBot('Uji suara pengawas Pad C Extension Banyuwangi. Sistem supervisi siap, T A R P Level 1 normal.');
+        }
+
+        // 9.3 CHAT HISTORY + TYPING + WIKIPEDIA LIVE
+        let CHAT_HIST = [];
+        try { CHAT_HIST = JSON.parse(localStorage.getItem('padc_chat_v2') || '[]'); } catch(e) { CHAT_HIST = []; }
+
+        function saveChatHistory() {
+            try { localStorage.setItem('padc_chat_v2', JSON.stringify(CHAT_HIST.slice(-40))); } catch(e) {}
+        }
+        function clearChatHistory() {
+            CHAT_HIST = []; saveChatHistory();
+            document.getElementById('chatMessages').innerHTML = '';
+            showToast('Riwayat chat dibersihkan', 'info');
+        }
+
+        function srcRowWiki(keyword, wikiTitle) {
+            const q = encodeURIComponent(keyword);
+            return `<div class="flex flex-wrap gap-2 pt-1.5 text-[9.5px] font-mono border-t border-slate-800/60 mt-1.5">
+                ${wikiTitle ? `<a href="https://id.wikipedia.org/wiki/${encodeURIComponent(wikiTitle.replace(/ /g,'_'))}" target="_blank" class="text-emerald-300 hover:underline"><i class="fa-brands fa-wikipedia-w"></i> Wikipedia: ${wikiTitle}</a>` : ''}
+                <a href="https://www.google.com/search?q=${q}" target="_blank" class="text-sky-300 hover:underline"><i class="fa-brands fa-google"></i> Google</a>
+                <a href="https://www.bing.com/search?q=${q}&showconv=1" target="_blank" class="text-rose-300 hover:underline"><i class="fa-solid fa-bolt"></i> Copilot</a>
+                <a href="https://gemini.google.com/app" target="_blank" class="text-purple-300 hover:underline"><i class="fa-solid fa-wand-magic-sparkles"></i> Gemini</a>
+            </div>`;
+        }
+
+        function bubbleUser(q) {
+            return `<div class="p-2.5 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-100 self-end max-w-[85%] ml-auto text-right font-mono text-[11px]">
+                <span class="text-amber-400 font-bold block text-[9px]">ENGINEER:</span>
+                ${q}
+            </div>`;
+        }
+        function bubbleBot(html) {
+            return `<div class="p-2.5 rounded-xl bg-slate-900/80 border border-cyan-500/30 text-slate-200 self-start max-w-[92%] font-mono text-[11px] space-y-1.5">
+                <span class="text-cyan-400 font-bold block text-[9px]">GEOCONSULT AI:</span>
+                ${html}
+            </div>`;
+        }
+
+        async function fetchWikipedia(q) {
+            try {
+                const r = await fetch(`https://id.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*&srlimit=1`);
+                const d = await r.json();
+                const hit = d.query && d.query.search && d.query.search[0];
+                if (hit) {
+                    const snip = hit.snippet.replace(/<[^>]*>/g, '').slice(0, 260);
+                    return { title: hit.title, snippet: snip, lang: 'id' };
+                }
+                const r2 = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(q)}&format=json&origin=*&srlimit=1`);
+                const d2 = await r2.json();
+                const hit2 = d2.query && d2.query.search && d2.query.search[0];
+                if (hit2) {
+                    return { title: hit2.title, snippet: hit2.snippet.replace(/<[^>]*>/g, '').slice(0, 260), lang: 'en' };
+                }
+            } catch(e) {}
+            return null;
+        }
+
+        // 9.4 SCREENSAVER (idle 120 detik + manual)
+        let SS_ACTIVE = false, SS_ANIM = null, SS_IDLE_T = null, SS_TICK = 0;
+        const SS_STATUS = [
+            'TARP LEVEL 1 — SEMUA PARAMETER SUPERVISI DALAM BATAS AMAN',
+            'STABILITAS LERENG STATIS FK 1.68 — MEMENUHI STANDAR 1.50',
+            'TEKANAN PORI VWP-01 NORMAL — MONITORING KONTINU 24/7',
+            'GEMPA DESAIN PGA 0.48g PuSGeN 2024 — RIWAYAT SEISMIK TERPANTAU',
+            'SALURAN LAS HDPE 2.0mm — 100% LOLOS UJI TEKANAN 210 kPa',
+            'CUACA LAPANGAN TERKAIT WINDY & BMKG — SIAGA HUJAN KONVEKTIF'
+        ];
+        function startScreensaver() {
+            const ss = document.getElementById('screensaver');
+            if (!ss || SS_ACTIVE) return;
+            SS_ACTIVE = true;
+            ss.classList.remove('hidden');
+            drawSsFrame();
+            SS_ANIM = setInterval(drawSsFrame, 90);
+            SS_ANIM_TICK = setInterval(() => {
+                SS_TICK = (SS_TICK + 1) % SS_STATUS.length;
+                const t = document.getElementById('ssTicker');
+                if (t) t.innerText = SS_STATUS[SS_TICK];
+            }, 5000);
+            updateSsClock();
+            SS_CLOCK_T = setInterval(updateSsClock, 1000);
+        }
+        let SS_ANIM_TICK = null, SS_CLOCK_T = null, SS_T = 0;
+        function stopScreensaver() {
+            SS_ACTIVE = false;
+            const ss = document.getElementById('screensaver');
+            if (ss) ss.classList.add('hidden');
+            if (SS_ANIM) { clearInterval(SS_ANIM); SS_ANIM = null; }
+            if (SS_ANIM_TICK) { clearInterval(SS_ANIM_TICK); SS_ANIM_TICK = null; }
+            if (SS_CLOCK_T) { clearInterval(SS_CLOCK_T); SS_CLOCK_T = null; }
+            resetIdleTimer();
+        }
+        function updateSsClock() {
+            const now = new Date();
+            const c = document.getElementById('ssClock');
+            const d = document.getElementById('ssDate');
+            if (c) c.innerText = now.toLocaleTimeString('id-ID');
+            if (d) d.innerText = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase() + ' — WIB';
+        }
+        function drawSsFrame() {
+            const cv = document.getElementById('ssCanvas');
+            if (!cv) return;
+            const w = cv.width = cv.offsetWidth || window.innerWidth;
+            const h = cv.height = cv.offsetHeight || window.innerHeight;
+            const ctx = cv.getContext('2d');
+            if (!ctx) return;
+            ctx.fillStyle = 'rgba(2,6,16,0.35)';
+            ctx.fillRect(0, 0, w, h);
+            SS_T += 0.006;
+            for (let i = 0; i < 90; i++) {
+                const x = (Math.sin(i * 12.9898 + SS_T * (1 + (i % 5))) * 0.5 + 0.5) * w;
+                const y = (Math.cos(i * 78.233 + SS_T * (1 + (i % 3))) * 0.5 + 0.5) * h;
+                const r = (i % 7 === 0) ? 2.2 : 1.2;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fillStyle = i % 9 === 0 ? 'rgba(251,191,36,0.9)' : 'rgba(148,163,184,0.45)';
+                ctx.fill();
+            }
+            ctx.strokeStyle = 'rgba(245,158,11,0.18)';
+            ctx.lineWidth = 1;
+            const cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.42;
+            ctx.beginPath(); ctx.arc(cx, cy, R * (1 + 0.05 * Math.sin(SS_T * 2)), 0, Math.PI * 2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy, R * 0.62 * (1 + 0.05 * Math.cos(SS_T * 2)), 0, Math.PI * 2); ctx.stroke();
+        }
+        function resetIdleTimer() {
+            if (SS_IDLE_T) clearTimeout(SS_IDLE_T);
+            SS_IDLE_T = setTimeout(() => { if (!SS_ACTIVE) startScreensaver(); }, 120000);
+        }
+
+        // 9.5 HELP MODAL
+        function openHelpModal() { document.getElementById('helpModal').classList.remove('hidden'); }
+        function closeHelpModal() { document.getElementById('helpModal').classList.add('hidden'); }
+
+        // 9.6 EKSPOR PDF BERITA ACARA (jsPDF + AutoTable)
+        async function exportSupervisionPDF() {
+            showToast('Menyiapkan Berita Acara PDF...', 'info');
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const W = 210;
+                doc.setFillColor(9, 20, 43); doc.rect(0, 0, W, 26, 'F');
+                doc.setTextColor(251, 191, 36); doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+                doc.text('BERITA ACARA PENGAWASAN FASILITAS PAD C EXTENSION', W / 2, 12, { align: 'center' });
+                doc.setTextColor(255, 255, 255); doc.setFontSize(8); doc.setFont('helvetica', 'normal');
+                doc.text('Proyek Tambang Emas Tujuh Bukit - Kec. Pesanggaran, Kab. Banyuwangi', W / 2, 18, { align: 'center' });
+                doc.text('Format: GISTM 2020 & SNI 1726  |  Ref: SUPV-BSI-PADC/2026/Q3  |  ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }), W / 2, 22.5, { align: 'center' });
+
+                let y = 34;
+                doc.setTextColor(20, 30, 50); doc.setFontSize(9);
+                doc.autoTable({
+                    startY: y,
+                    head: [['Identitas Proyek', 'Keterangan']],
+                    body: [
+                        ['Pemilik', 'PT Bumi Suksesindo (BSI)'],
+                        ['Fasilitas', 'Pad C Extension & PLS Pond'],
+                        ['Tingkat Konsekuensi', 'Extreme Consequence (GISTM 2020)'],
+                        ['Konsultan Pengawas', 'Tim Supervisi Geoteknik - Ir. Mohamad Hartadi'],
+                        ['Gempa Desain', 'PGA = 0.48g (PuSGeN 2024 MDE)'],
+                        ['Status Operasi', 'TARP LEVEL 1 (NORMAL)']
+                    ],
+                    theme: 'grid',
+                    headStyles: { fillColor: [9, 20, 43], textColor: [251, 191, 36] },
+                    styles: { fontSize: 8, cellPadding: 2 },
+                    margin: { left: 12, right: 12 }
+                });
+                y = doc.lastAutoTable.finalY + 6;
+
+                const saved = (() => { try { return JSON.parse(localStorage.getItem('padc_data_v2') || '{}'); } catch(e) { return {}; } })();
+                const pwp = (saved.pwp != null) ? saved.pwp : 42.5;
+                const inc = (saved.inc != null) ? saved.inc : 1.2;
+                const weir = (saved.weir != null) ? saved.weir : 0.85;
+
+                doc.autoTable({
+                    startY: y,
+                    head: [['Parameter Supervisi', 'Standar', 'Hasil Uji Lapangan', 'Status']],
+                    body: [
+                        ['Stabilitas Lereng Statis', '>= 1.50', '1.68', 'MEMENUHI'],
+                        ['Stabilitas Seismik MDE', '>= 1.15', '1.24', 'MEMENUHI'],
+                        ['Tekanan Pori (VWP-01)', '< 60.0 kPa', pwp.toFixed(1) + ' kPa', pwp < 60 ? 'AMAN' : 'WASPADA'],
+                        ['Deformasi Lateral', '<= 3.0 mm/bulan', inc.toFixed(1) + ' mm/bulan', inc <= 3 ? 'AMAN' : 'WASPADA'],
+                        ['Debit Weir Drainase', 'Indikatif <= 1.5 L/s', weir.toFixed(2) + ' L/detik', weir <= 1.5 ? 'AMAN' : 'WASPADA'],
+                        ['Uji Saluran Las HDPE', '210 kPa / 5 mnt', '100% Lolos Uji', 'MEMENUHI']
+                    ],
+                    theme: 'grid',
+                    headStyles: { fillColor: [120, 53, 15], textColor: [255, 255, 255] },
+                    styles: { fontSize: 8, cellPadding: 2 },
+                    margin: { left: 12, right: 12 }
+                });
+                y = doc.lastAutoTable.finalY + 8;
+
+                doc.setFontSize(9);
+                doc.text('Konsultan Supervisi Geoteknik,', 45, y);
+                doc.text('Mengetahui, Pengelola Tambang (KTT),', 130, y);
+                doc.text('( Ir. Mohamad Hartadi )', 45, y + 18);
+                doc.text('( ..................... )', 130, y + 18);
+                doc.setFontSize(7); doc.setTextColor(120, 120, 120);
+                doc.text('SKA Ahli Utama Bendungan Besar', 45, y + 23);
+                doc.text('PT Bumi Suksesindo', 130, y + 23);
+
+                doc.setFontSize(7); doc.setTextColor(100, 100, 100);
+                doc.text('Dokumen ini dihasilkan otomatis oleh PAD C EXTENSION TSF v2.0 PRO - dikembangkan oleh Ir. Mohamad Hartadi (FB: m.hartadi | Blog: newbieonline7.blogspot.com | WA: 0822-3103-6047)', W / 2, 290, { align: 'center' });
+
+                doc.save('Berita_Acara_PadC_Extension_' + new Date().toISOString().slice(0, 10) + '.pdf');
+                showToast('Berita Acara PDF berhasil diekspor', 'success');
+                speakBot('Berita acara pengawasan Pad C Extension berhasil diekspor dalam format PDF.');
+            } catch (err) {
+                showToast('Gagal membuat PDF: ' + err.message, 'error');
+            }
+        }
+
+
+        // ==================== 9.8 SEISMIC SITE REPORT ENGINE (SNI 1726:2019 & PuSGeN 2024) ====================
+        const ssrTableFa = [
+            { Ss: 0.25, SA: 0.8, SB: 0.9, SC: 1.3, SD: 1.6, SE: 2.4 },
+            { Ss: 0.50, SA: 0.8, SB: 0.9, SC: 1.3, SD: 1.4, SE: 1.7 },
+            { Ss: 0.75, SA: 0.8, SB: 0.9, SC: 1.2, SD: 1.2, SE: 1.3 },
+            { Ss: 1.00, SA: 0.8, SB: 0.9, SC: 1.2, SD: 1.1, SE: 1.1 },
+            { Ss: 1.25, SA: 0.8, SB: 0.9, SC: 1.2, SD: 1.0, SE: 0.9 },
+            { Ss: 1.50, SA: 0.8, SB: 0.9, SC: 1.2, SD: 1.0, SE: 0.8 }
+        ];
+        const ssrTableFv = [
+            { S1: 0.10, SA: 0.8, SB: 0.8, SC: 1.5, SD: 2.4, SE: 4.2 },
+            { S1: 0.20, SA: 0.8, SB: 0.8, SC: 1.5, SD: 2.2, SE: 3.3 },
+            { S1: 0.30, SA: 0.8, SB: 0.8, SC: 1.5, SD: 2.0, SE: 2.8 },
+            { S1: 0.40, SA: 0.8, SB: 0.8, SC: 1.5, SD: 1.9, SE: 2.4 },
+            { S1: 0.50, SA: 0.8, SB: 0.8, SC: 1.5, SD: 1.8, SE: 2.2 },
+            { S1: 0.60, SA: 0.8, SB: 0.8, SC: 1.5, SD: 1.7, SE: 2.0 }
+        ];
+        function ssrInterp(x, x0, x1, y0, y1) { return x1 === x0 ? y0 : y0 + ((x - x0) / (x1 - x0)) * (y1 - y0); }
+        function ssrGetFa(cls, Ss) {
+            if (cls === 'SA') return 0.8;
+            if (cls === 'SB') return 0.9;
+            const c = Math.max(0.25, Math.min(1.5, Ss));
+            for (let i = 0; i < ssrTableFa.length - 1; i++) {
+                if (c >= ssrTableFa[i].Ss && c <= ssrTableFa[i+1].Ss) return ssrInterp(c, ssrTableFa[i].Ss, ssrTableFa[i+1].Ss, ssrTableFa[i][cls], ssrTableFa[i+1][cls]);
+            }
+            return 1.0;
+        }
+        function ssrGetFv(cls, S1) {
+            if (cls === 'SA') return 0.8;
+            if (cls === 'SB') return 0.8;
+            const c = Math.max(0.1, Math.min(0.6, S1));
+            for (let i = 0; i < ssrTableFv.length - 1; i++) {
+                if (c >= ssrTableFv[i].S1 && c <= ssrTableFv[i+1].S1) return ssrInterp(c, ssrTableFv[i].S1, ssrTableFv[i+1].S1, ssrTableFv[i][cls], ssrTableFv[i+1][cls]);
+            }
+            return 1.5;
+        }
+        function ssrDetermineKDS(riskCat, SDS, SD1, S1) {
+            if (S1 >= 0.75) return (riskCat === 'IV') ? 'F' : 'E';
+            let kdsSds = (SDS < 0.167) ? 'A' : (SDS < 0.33) ? (riskCat === 'IV' ? 'C' : 'B') : (SDS < 0.50) ? (riskCat === 'IV' ? 'D' : 'C') : 'D';
+            let kdsSd1 = (SD1 < 0.067) ? 'A' : (SD1 < 0.133) ? (riskCat === 'IV' ? 'C' : 'B') : (SD1 < 0.20) ? (riskCat === 'IV' ? 'D' : 'C') : 'D';
+            const h = ['A', 'B', 'C', 'D', 'E', 'F'];
+            return h[Math.max(h.indexOf(kdsSds), h.indexOf(kdsSd1))];
+        }
+        const SSR_TR = [50, 100, 225, 475, 975, 1034, 2475, 5000, 10000];
+        function ssrSiteSpecific(basePga, baseSs, baseS1, vs30) {
+            let aP = 1.0, aS = 1.0, aL = 1.0;
+            if (vs30 <= 200) { aP = 1.65; aS = 1.85; aL = 2.40; }
+            else if (vs30 <= 400) { aP = 1.30; aS = 1.40; aL = 1.80; }
+            else if (vs30 <= 600) { aP = 1.10; aS = 1.15; aL = 1.30; }
+            const trF = { 50: 0.32, 100: 0.44, 225: 0.58, 475: 0.73, 975: 0.85, 1034: 0.86, 2475: 1.00, 5000: 1.15, 10000: 1.32 };
+            const rows = [];
+            SSR_TR.forEach(tr => {
+                const f = trF[tr];
+                const pga = basePga * f * aP, ss = baseSs * f * aS, s1 = baseS1 * f * aL;
+                rows.push({
+                    tr,
+                    pga: pga.toFixed(3),
+                    t01: (pga + (ss - pga) * 0.7).toFixed(3),
+                    t02: ss.toFixed(3),
+                    t03: (ss * 0.96).toFixed(3),
+                    t06: Math.min(ss * 0.85, s1 / 0.6).toFixed(3),
+                    t10: s1.toFixed(3),
+                    t20: (s1 / 2.0).toFixed(3)
+                });
+            });
+            return rows;
+        }
+        var chartSeismicInstance = null, SSR_RESULT = null;
+        function runSeismicCalc(silent) {
+            const lat = parseFloat(document.getElementById('ssrLat').value) || -8.5985;
+            const lon = parseFloat(document.getElementById('ssrLon').value) || 114.0375;
+            const soil = document.getElementById('ssrSoil').value;
+            const risk = document.getElementById('ssrRisk').value;
+            const pga = parseFloat(document.getElementById('ssrPga').value) || 0.48;
+            const Ss = parseFloat(document.getElementById('ssrSs').value) || 1.05;
+            const S1 = parseFloat(document.getElementById('ssrS1').value) || 0.42;
+            const vs30 = parseFloat(document.getElementById('ssrVs30').value) || 280;
+
+            const Ie = (risk === 'IV') ? 1.50 : (risk === 'III') ? 1.25 : 1.00;
+            const Fa = ssrGetFa(soil, Ss);
+            const Fv = ssrGetFv(soil, S1);
+            const SMS = Fa * Ss, SM1 = Fv * S1;
+            const SDS = (2 / 3) * SMS, SD1 = (2 / 3) * SM1;
+            const Ts = SD1 / SDS, T0 = 0.2 * Ts, TL = 4.0;
+            const kds = ssrDetermineKDS(risk, SDS, SD1, S1);
+            const kh = 0.5 * pga;
+
+            SSR_RESULT = { lat, lon, soil, risk, pga, Ss, S1, vs30, Ie, Fa, Fv, SMS, SM1, SDS, SD1, T0, Ts, TL, kds, kh };
+
+            document.getElementById('dispSsrFa').innerText = Fa.toFixed(3);
+            document.getElementById('dispSsrFv').innerText = Fv.toFixed(3);
+            document.getElementById('dispSsrSMS').innerText = SMS.toFixed(3) + ' g';
+            document.getElementById('dispSsrSM1').innerText = SM1.toFixed(3) + ' g';
+            document.getElementById('dispSsrSDS').innerText = SDS.toFixed(3) + ' g';
+            document.getElementById('dispSsrSD1').innerText = SD1.toFixed(3) + ' g';
+            document.getElementById('dispSsrT0').innerText = T0.toFixed(3) + ' s';
+            document.getElementById('dispSsrTs').innerText = Ts.toFixed(3) + ' s';
+            document.getElementById('dispSsrIe').innerText = Ie.toFixed(2);
+            document.getElementById('dispSsrKDS').innerText = 'KDS ' + kds;
+            document.getElementById('dispSsrKh').innerText = kh.toFixed(3) + ' g';
+
+            const note = document.getElementById('ssrKdsNote');
+            if (S1 >= 0.75) {
+                note.innerHTML = `Titik (${lat.toFixed(4)}, ${lon.toFixed(4)}) — Kelas ${soil}, Risiko ${risk}: <b class="text-rose-400">S1 = ${S1.toFixed(2)}g ≥ 0.75g → KDS ${kds} otomatis</b> (SNI 1726:2019 Pasal 6.5).`;
+            } else {
+                note.innerHTML = `Titik (${lat.toFixed(4)}, ${lon.toFixed(4)}) — Kelas ${soil}, Risiko ${risk} (Ie=${Ie.toFixed(2)}): KDS ${kds} dari SDS = ${SDS.toFixed(3)}g &amp; SD1 = ${SD1.toFixed(3)}g (Tabel 8 &amp; 9 SNI 1726:2019). Faktor situs Fa=${Fa.toFixed(3)}, Fv=${Fv.toFixed(3)}.`;
+            }
+
+            // Tabel spektrum
+            const tbody = document.getElementById('ssrSpectrumTable');
+            let tSet = [0];
+            for (let t = 0.05; t <= 4.01; t += 0.05) tSet.push(parseFloat(t.toFixed(2)));
+            tSet.push(parseFloat(T0.toFixed(3)), parseFloat(Ts.toFixed(3)));
+            tSet.sort((a, b) => a - b);
+            tSet = [...new Set(tSet)];
+            let rowsHtml = '';
+            const spectrumData = [];
+            tSet.forEach(t => {
+                let saD, saM;
+                const T0x = T0, Tsx = Ts;
+                if (t <= T0x) { saD = SDS * (0.4 + 0.6 * t / T0x); saM = SMS * (0.4 + 0.6 * t / T0x); }
+                else if (t <= Tsx) { saD = SDS; saM = SMS; }
+                else if (t <= TL) { saD = SD1 / t; saM = SM1 / t; }
+                else { saD = (SD1 * TL) / (t * t); saM = (SM1 * TL) / (t * t); }
+                spectrumData.push({ t, saD: saD.toFixed(3), saM: saM.toFixed(3) });
+                rowsHtml += `<tr><td class="p-2">${t.toFixed(2)}</td><td class="p-2 text-right text-amber-300 font-bold">${saD.toFixed(3)}</td><td class="p-2 text-right text-orange-400">${saM.toFixed(3)}</td></tr>`;
+            });
+            tbody.innerHTML = rowsHtml;
+            SSR_RESULT.spectrum = spectrumData;
+
+            // Spektrum spesifik situs
+            const siteRows = ssrSiteSpecific(pga, Ss, S1, vs30);
+            document.getElementById('ssrSiteSpecificTable').innerHTML = siteRows.map(r =>
+                `<tr><td class="p-2 font-bold text-purple-300">${r.tr}</td><td class="p-2 text-rose-400">${r.pga}</td><td class="p-2">${r.t01}</td><td class="p-2 text-amber-300 font-bold">${r.t02}</td><td class="p-2">${r.t03}</td><td class="p-2">${r.t06}</td><td class="p-2 text-cyan-300">${r.t10}</td><td class="p-2">${r.t20}</td></tr>`
+            ).join('');
+            SSR_RESULT.siteSpecific = siteRows;
+
+            // Chart kurva spektrum
+            const ctx = document.getElementById('seismicSpectrumChart');
+            if (!ctx) return;
+            if (chartSeismicInstance) chartSeismicInstance.destroy();
+            const tr2475 = siteRows.find(r => r.tr === 2475);
+            chartSeismicInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: spectrumData.map(d => d.t.toFixed(2)),
+                    datasets: [
+                        { label: `Spektrum Desain (SDS=${SDS.toFixed(2)}g)`, data: spectrumData.map(d => d.saD), borderColor: '#f43f5e', backgroundColor: 'rgba(244,63,94,0.12)', borderWidth: 3, fill: true, tension: 0.05, pointRadius: 0 },
+                        { label: `Spektrum MCE (SMS=${SMS.toFixed(2)}g)`, data: spectrumData.map(d => d.saM), borderColor: '#fb923c', borderDash: [8, 4], borderWidth: 2, fill: false, tension: 0.05, pointRadius: 0 },
+                        { label: 'Site-Specific TR 2475 Th (Vs30=' + vs30 + ')', data: spectrumData.map(d => {
+                            const t = d.t;
+                            if (t <= 0.1) return tr2475.t01; if (t <= 0.2) return tr2475.t02;
+                            if (t <= 0.3) return tr2475.t03; if (t <= 0.6) return tr2475.t06;
+                            if (t <= 1.0) return tr2475.t10; if (t <= 2.0) return tr2475.t20;
+                            return (tr2475.t20 / 2).toFixed(3);
+                          }), borderColor: '#a78bfa', borderWidth: 2, fill: false, tension: 0.15, pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Periode T (detik)', color: '#94a3b8' }, ticks: { color: '#94a3b8', maxTicksLimit: 20 }, grid: { color: '#1e293b' } },
+                        y: { title: { display: true, text: 'Percepatan Spektral Sa (g)', color: '#94a3b8' }, ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' }, beginAtZero: true }
+                    },
+                    plugins: { legend: { labels: { color: '#cbd5e1' } }, tooltip: { mode: 'index', intersect: false } }
+                }
+            });
+
+            try { localStorage.setItem('padc_seismic_v2', JSON.stringify({ lat, lon, soil, risk, pga, Ss, S1, vs30 })); } catch(e) {}
+            if (!silent) {
+                showToast(`Site report seismik hitung: SDS ${SDS.toFixed(3)}g • SD1 ${SD1.toFixed(3)}g • KDS ${kds}`, 'success');
+                speakBot(`Perhitungan seismik situs Pad C selesai. S D S ${SDS.toFixed(2)} g, S D 1 ${SD1.toFixed(2)} g, kategori desain seismik ${kds}.`);
+            }
+        }
+
+        function exportSeismicPDF() {
+            if (!SSR_RESULT) runSeismicCalc(true);
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const W = 210, R = SSR_RESULT;
+                doc.setFillColor(9, 20, 43); doc.rect(0, 0, W, 24, 'F');
+                doc.setTextColor(251, 191, 36); doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+                doc.text('LAPORAN TEKNIK ANALISIS SEISMIK & RESPONS SPESIFIK SITUS', W / 2, 11, { align: 'center' });
+                doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+                doc.text('SNI 1726:2019 & PuSGeN 2024 - PAD C EXTENSION TSF, Banyuwangi (GISTM 2020)', W / 2, 17, { align: 'center' });
+                doc.text('Tanggal: ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) + '  |  Ref: SSR-BSI-PADC/2026', W / 2, 21, { align: 'center' });
+
+                doc.autoTable({
+                    startY: 30,
+                    head: [['Identifikasi Titik Terpilih', 'Nilai']],
+                    body: [
+                        ['Latitude (Lintang)', R.lat.toFixed(6) + ' derajat'],
+                        ['Longitude (Bujur)', R.lon.toFixed(6) + ' derajat'],
+                        ['Kelas Situs', R.soil],
+                        ['Kategori Risiko', R.risk + ' (Ie = ' + R.Ie.toFixed(2) + ')'],
+                        ['PGA Batuan Dasar', R.pga.toFixed(3) + ' g'],
+                        ['Ss (0.2 s) / S1 (1.0 s)', R.Ss.toFixed(3) + ' g / ' + R.S1.toFixed(3) + ' g'],
+                        ['Vs30 Site-Specific', R.vs30 + ' m/s']
+                    ],
+                    theme: 'grid', headStyles: { fillColor: [9, 20, 43], textColor: [251, 191, 36] },
+                    styles: { fontSize: 8, cellPadding: 1.8 }, margin: { left: 12, right: 12 }
+                });
+                doc.autoTable({
+                    startY: doc.lastAutoTable.finalY + 4,
+                    head: [['Parameter Respons Seismik', 'Nilai', 'Standar']],
+                    body: [
+                        ['Faktor Situs Fa', R.Fa.toFixed(3), 'Tabel 3 SNI 1726:2019'],
+                        ['Faktor Situs Fv', R.Fv.toFixed(3), 'Tabel 4 SNI 1726:2019'],
+                        ['SMS = Fa.Ss', R.SMS.toFixed(3) + ' g', 'Pasal 6.3'],
+                        ['SM1 = Fv.S1', R.SM1.toFixed(3) + ' g', 'Pasal 6.3'],
+                        ['SDS = 2/3.SMS', R.SDS.toFixed(3) + ' g', 'Pasal 6.4'],
+                        ['SD1 = 2/3.SM1', R.SD1.toFixed(3) + ' g', 'Pasal 6.4'],
+                        ['T0 / Ts / TL', R.T0.toFixed(3) + ' / ' + R.Ts.toFixed(3) + ' / 4.00 s', 'Pasal 6.4'],
+                        ['Kategori Desain Seismik', 'KDS ' + R.kds, 'Tabel 8 & 9'],
+                        ['Koefisien Pseudo-Statis kh', R.kh.toFixed(3) + ' g', '0.5 x PGA (praktek dam safety)']
+                    ],
+                    theme: 'grid', headStyles: { fillColor: [120, 53, 15], textColor: [255, 255, 255] },
+                    styles: { fontSize: 8, cellPadding: 1.8 }, margin: { left: 12, right: 12 }
+                });
+                doc.autoTable({
+                    startY: doc.lastAutoTable.finalY + 4,
+                    head: [['Periode Ulang (Th)', 'PGA (g)', 'T=0.1s', 'T=0.2s', 'T=0.3s', 'T=0.6s', 'T=1.0s', 'T=2.0s']],
+                    body: R.siteSpecific.map(r => [r.tr, r.pga, r.t01, r.t02, r.t03, r.t06, r.t10, r.t20]),
+                    theme: 'grid', headStyles: { fillColor: [76, 29, 149], textColor: [255, 255, 255] },
+                    styles: { fontSize: 7, cellPadding: 1.4 }, margin: { left: 12, right: 12 }
+                });
+                const yEnd = doc.lastAutoTable.finalY + 10;
+                doc.setFontSize(9);
+                doc.text('Disusun oleh Konsultan Supervisi Geoteknik,', 45, yEnd);
+                doc.text('( Ir. Mohamad Hartadi )', 45, yEnd + 16);
+                doc.setFontSize(7); doc.setTextColor(120, 120, 120);
+                doc.text('SKA Ahli Utama Bendungan Besar', 45, yEnd + 21);
+                doc.setFontSize(7);
+                doc.text('Dokumen dihasilkan otomatis oleh PAD C EXTENSION TSF v2.1 PRO - Ir. Mohamad Hartadi (FB: m.hartadi | Blog: newbieonline7.blogspot.com | WA: 0822-3103-6047)', W / 2, 291, { align: 'center' });
+                doc.save('Seismic_Site_Report_PadC_Banyuwangi.pdf');
+                showToast('Seismic Site Report PDF berhasil diekspor', 'success');
+                speakBot('Laporan seismik situs Pad C Extension berhasil diekspor.');
+            } catch (err) { showToast('Gagal membuat PDF: ' + err.message, 'error'); }
+        }
+
+        function exportSeismicXLSX() {
+            if (!SSR_RESULT) runSeismicCalc(true);
+            try {
+                if (typeof XLSX === 'undefined') { showToast('Library SheetJS masih dimuat...', 'warn'); return; }
+                const R = SSR_RESULT, wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.aoa_to_sheet([
+                    ['LAPORAN SEISMIK SITUS - PAD C EXTENSION TSF (SNI 1726:2019 & PuSGeN 2024)'],
+                    ['Titik Terpilih', 'Lat ' + R.lat.toFixed(4) + ' / Lon ' + R.lon.toFixed(4)],
+                    ['Kelas Situs', R.soil], ['Kategori Risiko', R.risk + ' (Ie=' + R.Ie.toFixed(2) + ')'],
+                    ['PGA', R.pga, 'g'], ['Ss', R.Ss, 'g'], ['S1', R.S1, 'g'], ['Vs30', R.vs30, 'm/s'], [],
+                    ['Parameter', 'Nilai'],
+                    ['Fa', R.Fa.toFixed(3)], ['Fv', R.Fv.toFixed(3)],
+                    ['SMS (g)', R.SMS.toFixed(3)], ['SM1 (g)', R.SM1.toFixed(3)],
+                    ['SDS (g)', R.SDS.toFixed(3)], ['SD1 (g)', R.SD1.toFixed(3)],
+                    ['T0 (s)', R.T0.toFixed(3)], ['Ts (s)', R.Ts.toFixed(3)], ['KDS', R.kds], ['kh (g)', R.kh.toFixed(3)], [],
+                    ['T (s)', 'Sa Desain (g)', 'Sa MCE (g)'],
+                    ...R.spectrum.map(d => [d.t, d.saD, d.saM]), [],
+                    ['Periode Ulang (Th)', 'PGA (g)', '0.1s', '0.2s', '0.3s', '0.6s', '1.0s', '2.0s'],
+                    ...R.siteSpecific.map(r => [r.tr, r.pga, r.t01, r.t02, r.t03, r.t06, r.t10, r.t20])
+                ]);
+                XLSX.utils.book_append_sheet(wb, ws, 'Seismic_Site_PadC');
+                XLSX.writeFile(wb, 'Seismic_Site_Report_PadC_Banyuwangi.xlsx');
+                showToast('Data seismik diekspor ke Excel', 'success');
+            } catch (err) { showToast('Gagal ekspor Excel: ' + err.message, 'error'); }
+        }
+
+        // 9.7 BOOT SEQUENCE + INIT v2.0
+        function runBoot() {
+            const bar = document.getElementById('bootBar');
+            const status = document.getElementById('bootStatus');
+            const steps = [
+                [18, 'MEMUAT PETA KOMANDO PAD C...'],
+                [42, 'KONEKSI SENSOR VWP & MONITORING...'],
+                [64, 'MEMUAT PRAKIRAAN CUACA & WINDY...'],
+                [82, 'MENGHIDUPKAN GEOCONSULT AI (TTS)...'],
+                [100, 'SISTEM SUPERVISI SIAP. SELAMAT BEKERJA.']
+            ];
+            let i = 0;
+            const t = setInterval(() => {
+                if (i >= steps.length) {
+                    clearInterval(t);
+                    setTimeout(() => {
+                        const ov = document.getElementById('bootOverlay');
+                        if (ov) { ov.style.opacity = '0'; setTimeout(() => ov.remove(), 700); }
+                        showToast('PAD C EXTENSION TSF v2.1 PRO siap digunakan', 'success');
+                    }, 500);
+                    return;
+                }
+                bar.style.width = steps[i][0] + '%';
+                status.innerText = steps[i][1];
+                i++;
+            }, 380);
+        }
+
+        window.onload = function() {
+            initClock();
+            initCommandMap();
+            initTTS();
+            runBoot();
+
+            // Muat data tersimpan
+            try {
+                const saved = JSON.parse(localStorage.getItem('padc_data_v2') || '{}');
+                if (saved.pwp != null) document.getElementById('valVwp01').innerText = saved.pwp.toFixed(1) + ' kPa';
+                if (saved.inc != null) document.getElementById('valInc03').innerText = saved.inc.toFixed(1) + ' mm/bulan';
+                if (saved.weir != null) document.getElementById('valWeir02').innerText = saved.weir.toFixed(2) + ' L/detik';
+            } catch(e) {}
+
+            // Muat riwayat chat tersimpan
+            try {
+                const box = document.getElementById('chatMessages');
+                CHAT_HIST.forEach(m => { box.innerHTML += (m.role === 'user' ? bubbleUser(m.text) : bubbleBot(m.text)); });
+            } catch(e) {}
+
+            // Muat input seismik tersimpan & auto-hitung
+            try {
+                const sq = JSON.parse(localStorage.getItem('padc_seismic_v2') || '{}');
+                if (sq.lat != null) document.getElementById('ssrLat').value = sq.lat;
+                if (sq.lon != null) document.getElementById('ssrLon').value = sq.lon;
+                if (sq.soil) document.getElementById('ssrSoil').value = sq.soil;
+                if (sq.risk) document.getElementById('ssrRisk').value = sq.risk;
+                if (sq.pga != null) document.getElementById('ssrPga').value = sq.pga;
+                if (sq.Ss != null) document.getElementById('ssrSs').value = sq.Ss;
+                if (sq.S1 != null) document.getElementById('ssrS1').value = sq.S1;
+                if (sq.vs30 != null) document.getElementById('ssrVs30').value = sq.vs30;
+            } catch(e) {}
+            setTimeout(() => runSeismicCalc(true), 2600);
+
+            // Screensaver: idle 120 detik, tutup dengan klik/tombol
+            const ss = document.getElementById('screensaver');
+            if (ss) ss.addEventListener('click', stopScreensaver);
+            document.addEventListener('keydown', e => { if (SS_ACTIVE) { stopScreensaver(); } });
+            ['mousemove', 'mousedown', 'touchstart', 'keydown', 'scroll'].forEach(evt => {
+                document.addEventListener(evt, resetIdleTimer, { passive: true });
+            });
+            resetIdleTimer();
+        };
+    </script>
+</body>
+</html>
